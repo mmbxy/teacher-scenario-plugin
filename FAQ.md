@@ -10,6 +10,14 @@
 - 建议装到**不随应用升级清理**的目录，并把该目录加入用户 PATH；
 - 改完 PATH 通常要**重启一次应用**，宿主的子进程才会继承新路径。
 
+### Q：可以从 npm 安装吗？
+
+可以，这是推荐方式：`install_bundle` 的 `target` 填 `teacher-scenario-plugin@0.1.2`。它只依赖 npm registry，不需要访问 GitHub。
+
+### Q：报 `already-installed` 怎么办？
+
+profile 里已经有同版本（可能来自 tarball 或别的源）。若要换成另一个源，先 `remove_bundle`，再 `install_bundle`。
+
 ### Q：报 `ERR_PNPM_GIT_RESOLVE_FAILED` / `Connection was reset`？
 
 这是本机到 `github.com:443` 的网络问题，不是插件或仓库的问题。

@@ -26,15 +26,25 @@
 - 宿主具备插件管理能力（Web 侧栏「插件」页，或创造模式的 `plugin_manager` 工具）；
 - 宿主进程能找到 `pnpm`（插件管理器用它安装依赖）。
 
-### 方式一：从 Release 安装（推荐，已验证）
+### 方式一：从 npm 安装（推荐，已验证）
+
+`install_bundle` 的 `target` 指向精确版本：
+
+```
+teacher-scenario-plugin@0.1.2
+```
+
+优点：只依赖 npm registry，不依赖 GitHub 连通性；升级时改版本号重装即可。
+
+### 方式二：从 Release 安装（离线备选，已验证）
 
 1. 打开 [Releases](https://github.com/mmbxy/teacher-scenario-plugin/releases)，下载 `teacher-scenario-plugin-<version>.tgz`；
 2. 在创造模式会话中让 agent 调用 `plugin_manager` 的 `install_bundle`，`target` 指向该文件的**绝对路径**；
 3. 或使用 Web 侧栏「插件 → 添加插件」选择本地文件。
 
-优点：安装过程不访问 GitHub，不受网络波动影响。
+优点：安装过程不访问 GitHub，也不访问 registry，适合完全离线的环境。
 
-### 方式二：从 GitHub 安装（需要稳定的 GitHub 连通性）
+### 方式三：从 GitHub 安装（需要稳定的 GitHub 连通性）
 
 `install_bundle` 的 `target` 指向 tag 或 commit：
 
@@ -42,9 +52,9 @@
 git+https://github.com/mmbxy/teacher-scenario-plugin#v0.1.2
 ```
 
-> 请使用 tag 或 commit，不要用浮动分支。若报 `Connection was reset` 或 `timed out after 5000ms`，请改用方式一。
+> 请使用 tag 或 commit，不要用浮动分支。若报 `Connection was reset` 或 `timed out after 5000ms`，请改用方式一或二。
 
-### 方式三：通过 Web 插件页
+### 方式四：通过 Web 插件页
 
 侧栏「插件 → 添加插件」可安装随附/本地/远程包；具体输入形式取决于宿主版本。
 
@@ -62,8 +72,9 @@ git+https://github.com/mmbxy/teacher-scenario-plugin#v0.1.2
 
 | 项 | 状态 | 说明 |
 |---|---|---|
+| npm 安装 | ✅ 已验证 | profile 依赖为 `teacher-scenario-plugin: 0.1.2`，`install_bundle` 返回 `applied` |
 | tarball 安装 | ✅ 已验证 | 安装返回 `applied`，版本 0.1.2 |
-| 工具注册与端到端生成 | ✅ 已验证 | 3 件产物、5 步讲解、6 题、讲义 5 章、无外链 |
+| 工具注册与端到端生成 | ✅ 已验证 | 3 件产物、6 题、讲义 5 章、无外链 |
 | GitHub git 安装 | ⚠️ 未验证 | 本机网络对 github.com 不稳定；隔离环境 `pnpm add git+ssh` 成功 |
 | GUI 入口渲染 | ⚠️ 未验证 | `client.js` 已随包安装，未在界面确认 |
 | 讲解页视觉与交互 | ⚠️ 未验证 | 仅做了静态结构与脚本语法检查 |
