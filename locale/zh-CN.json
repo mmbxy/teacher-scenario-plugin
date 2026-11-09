@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "title": "一线教师·场景化备课",
+    "description": "输入知识点，生成可交互讲解页、讲义与基础练习题。"
+  },
+  "plugin.name": "一线教师·场景化备课",
+  "plugin.description": "输入知识点，生成讲解页、讲义与练习题",
+  "entry.button": "一键备课",
+  "panel.title": "生成备课材料",
+  "panel.label.topic": "知识点",
+  "panel.label.audience": "教学对象",
+  "panel.label.difficulty": "难度",
+  "panel.label.count": "习题数量",
+  "panel.action.generate": "生成讲解 + 材料",
+  "state.running": "正在生成…",
+  "state.success": "已生成 {count} 个产物",
+  "error.INVALID_INPUT": "知识点不能为空，请输入 1–2000 字",
+  "error.CAPABILITY_UNAVAILABLE": "生成能力不可用，请确认插件已启用后重试",
+  "error.GENERATION_FAILED": "生成失败，请缩短输入后重试",
+  "error.OUTPUT_WRITE_FAILED": "产物写入失败，请检查输出目录权限",
+  "error.TIMEOUT": "生成超时，请重试或减少习题数量",
+  "artifact.interactive_lesson": "可交互讲解页",
+  "artifact.handout": "讲义",
+  "artifact.exercises": "练习题",
+  "action.open": "打开",
+  "action.download": "下载"
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}} · 可交互讲解页</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --danger: #dc2626;
+      --line: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px 48px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+      line-height: 1.7;
+    }
+    .lesson { max-width: 880px; margin: 0 auto; }
+    .block {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+    }
+    .eyebrow { margin: 0 0 6px; color: var(--muted); font-size: 13px; letter-spacing: 0.04em; }
+    h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.3; }
+    h2 { margin: 0 0 14px; font-size: 20px; color: var(--accent); }
+    h3 { margin: 0 0 6px; font-size: 16px; }
+    .goal { margin: 0; padding: 12px 14px; background: var(--accent-soft); border-radius: 10px; }
+    .steps { list-style: none; margin: 0; padding: 0; }
+    .step {
+      display: none;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      background: #fbfdff;
+    }
+    .step.is-active { display: block; }
+    .step-controls { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+    .step-controls button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .step-controls button:disabled { opacity: 0.45; cursor: not-allowed; }
+    #step-status { color: var(--muted); font-size: 13px; }
+    .interactive-panel { display: grid; gap: 10px; }
+    .interactive-panel label { font-weight: 600; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    output { color: var(--accent); font-weight: 700; }
+    .canvas-wrap { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #f8fafc; }
+    #tangent-svg { display: block; width: 100%; height: auto; }
+    .hint { margin: 0; color: var(--muted); font-size: 14px; }
+    .misconception { padding: 12px 14px; border-radius: 10px; background: #fbfdff; border: 1px dashed var(--line); margin-bottom: 10px; }
+    .misconception:last-child { margin-bottom: 0; }
+    .wrong { margin: 4px 0; color: var(--danger); }
+    .right { margin: 4px 0; color: #15803d; }
+    .summary-list { margin: 0; padding-left: 22px; }
+    .summary-list li { margin-bottom: 8px; }
+    footer { color: var(--muted); font-size: 13px; text-align: center; padding: 8px 0 0; }
+    footer p { margin: 0; }
+  </style>
+</head>
+<body>
+  <main class="lesson">
+    <header id="title" class="block">
+      <p class="eyebrow">可交互讲解页 ｜ {{AUDIENCE}} ｜ {{DIFFICULTY}}</p>
+      <h1>{{TITLE}}</h1>
+      <p class="goal">学习目标：{{GOAL}}</p>
+    </header>
+
+    <section id="concept" class="block">
+      <h2>概念定义</h2>
+      <p>{{DEFINITION}}</p>
+    </section>
+
+    <section id="process" class="block">
+      <h2>过程拆解</h2>
+      <ol id="steps" class="steps">
+      {{STEPS}}
+      </ol>
+      <div class="step-controls">
+        <button type="button" id="prev-step">上一步</button>
+        <span id="step-status">1 / {{STEP_COUNT}}</span>
+        <button type="button" id="next-step">下一步</button>
+      </div>
+    </section>
+
+    <section id="interactive" class="block">
+      <h2>交互元素</h2>
+      {{INTERACTIVE}}
+    </section>
+
+    <section id="misconceptions" class="block">
+      <h2>常见误区</h2>
+      {{MISCONCEPTIONS}}
+    </section>
+
+    <section id="summary" class="block">
+      <h2>小结</h2>
+      {{SUMMARY}}
+    </section>
+
+    <footer>
+      <p>知识点：{{TOPIC}} ｜ 教学对象：{{AUDIENCE}} ｜ 生成时间：{{GENERATED_AT}}</p>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+      var status = document.getElementById('step-status');
+      var prev = document.getElementById('prev-step');
+      var next = document.getElementById('next-step');
+      var range = document.getElementById('step-range');
+      var rangeValue = document.getElementById('step-range-value');
+      var current = 0;
+
+      function show(index) {
+        if (!steps.length) return;
+        current = Math.max(0, Math.min(steps.length - 1, index));
+        steps.forEach(function (step, i) {
+          step.className = i === current ? 'step is-active' : 'step';
+        });
+        if (status) status.textContent = (current + 1) + ' / ' + steps.length;
+        if (range) range.value = String(current + 1);
+        if (rangeValue) rangeValue.textContent = String(current + 1);
+        if (prev) prev.disabled = current === 0;
+        if (next) next.disabled = current === steps.length - 1;
+      }
+
+      if (prev) prev.addEventListener('click', function () { show(current - 1); });
+      if (next) next.addEventListener('click', function () { show(current + 1); });
+      if (range) range.addEventListener('input', function () { show(Number(range.value) - 1); });
+      show(0);
+    })();
+
+    (function () {
+      var slider = document.getElementById('x-slider');
+      if (!slider) return;
+
+      var W = 360;
+      var H = 200;
+      var PAD = 20;
+      var X_MIN = -2;
+      var X_MAX = 2;
+      var Y_MIN = -2;
+      var Y_MAX = 2;
+      var line = document.getElementById('tangent-line');
+      var point = document.getElementById('tangent-point');
+      var xValue = document.getElementById('x-value');
+      var slopeValue = document.getElementById('slope-value');
+
+      function sx(x) { return PAD + ((x - X_MIN) / (X_MAX - X_MIN)) * (W - PAD * 2); }
+      function sy(y) { return H - PAD - ((y - Y_MIN) / (Y_MAX - Y_MIN)) * (H - PAD * 2); }
+      function f(x) { return x * x * x - 3 * x; }
+      function slope(x) { return 3 * x * x - 3; }
+      function round(value) { return Math.round(value * 100) / 100; }
+
+      function update() {
+        var x = Number(slider.value);
+        var m = slope(x);
+        var y = f(x);
+        var half = 0.5;
+        if (xValue) xValue.textContent = String(round(x));
+        if (slopeValue) slopeValue.textContent = String(round(m));
+        if (point) {
+          point.setAttribute('cx', String(round(sx(x))));
+          point.setAttribute('cy', String(round(sy(y))));
+        }
+        if (line) {
+          line.setAttribute('x1', String(round(sx(x - half))));
+          line.setAttribute('y1', String(round(sy(y - m * half))));
+          line.setAttribute('x2', String(round(sx(x + half))));
+          line.setAttribute('y2', String(round(sy(y + m * half))));
+        }
+      }
+
+      slider.addEventListener('input', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

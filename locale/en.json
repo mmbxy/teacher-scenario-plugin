@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "title": "Teacher Lesson Kit",
+    "description": "Turn a knowledge point into an interactive lesson page, a handout, and basic exercises."
+  },
+  "plugin.name": "Teacher Scenario Plugin",
+  "plugin.description": "Generate an interactive lesson, handout and exercises from a knowledge point.",
+  "entry.button": "Prepare a Lesson",
+  "panel.title": "Generate Lesson Materials",
+  "panel.label.topic": "Knowledge Point",
+  "panel.label.audience": "Audience",
+  "panel.label.difficulty": "Difficulty",
+  "panel.label.count": "Exercise Count",
+  "panel.action.generate": "Generate Lesson and Materials",
+  "state.running": "Generating…",
+  "state.success": "Generated {count} artifacts",
+  "error.INVALID_INPUT": "Knowledge point is required. Enter 1–2000 characters.",
+  "error.CAPABILITY_UNAVAILABLE": "Generation capability is unavailable. Check that the plugin is enabled and try again.",
+  "error.GENERATION_FAILED": "Generation failed. Shorten the input and try again.",
+  "error.OUTPUT_WRITE_FAILED": "Failed to write artifacts. Check the output directory permissions.",
+  "error.TIMEOUT": "Generation timed out. Retry or reduce the exercise count.",
+  "artifact.interactive_lesson": "Interactive Lesson",
+  "artifact.handout": "Handout",
+  "artifact.exercises": "Exercises",
+  "action.open": "Open",
+  "action.download": "Download"
+}

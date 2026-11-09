@@ -1,0 +1,7 @@
+# 本 bundle 的加载补丁：向宿主 profile 插入一行 Host 插件。
+# 键名与语义以当前运行时（DSH 0.2.1-rc.2）为准，已由 install_bundle 实测。
+- insert:
+    - id: teacher-scenario-plugin
+      name: 'teacher-scenario-plugin'
+      config:
+        timeoutMs: 120000

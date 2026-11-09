@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="一线教师备课插件图标">
+  <!-- TODO(待宿主确认 C14)：宿主对图标尺寸、命名、是否需要 PNG 多尺寸的要求未知。 -->
+  <rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="#2F6FED" stroke-width="2"/>
+  <path d="M8 4v16" fill="none" stroke="#2F6FED" stroke-width="2"/>
+  <path d="M12 9l5 3-5 3z" fill="#2F6FED"/>
+</svg>

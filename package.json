@@ -1,0 +1,60 @@
+{
+  "name": "teacher-scenario-plugin",
+  "version": "0.1.2",
+  "description": "一线教师场景化备课插件：输入知识点，生成可交互讲解页、讲义与练习题。/ Lesson kit for teachers: turn a topic into an interactive lesson page, handout and exercises.",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "node --test tests/validate.test.js tests/generate.test.js tests/artifacts.test.js",
+    "check": "node scripts/check.mjs",
+    "verify": "npm test && npm run check"
+  },
+  "exports": {
+    ".": "./index.mjs",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.mjs",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "dsh": ">=0.2.1-rc.2"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "ofdesk-plugin",
+    "education",
+    "teacher",
+    "lesson-plan",
+    "markdown",
+    "html"
+  ],
+  "license": "MIT",
+  "author": "mmbxy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmbxy/teacher-scenario-plugin.git"
+  },
+  "homepage": "https://github.com/mmbxy/teacher-scenario-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/mmbxy/teacher-scenario-plugin/issues"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-ui-conversation"]
+    }
+  }
+}
