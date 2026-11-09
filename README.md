@@ -4,15 +4,15 @@
 
 - Host 侧：工具 `teacher_generate_lesson`
 - Client 侧：输入区下方的「一键备课」条
-- 零运行时依赖，产物全部落在会话工作目录，单文件离线可看
+- 零运行时依赖，产物落在会话工作目录，单文件离线可看
 
-> 状态：0.1.2（源码）。本地安装与端到端生成已验证；GitHub git 安装、GUI 入口渲染、讲解页视觉与交互仍待验证。
+> 状态：0.1.2。安装（tarball 通道）、工具注册、端到端生成已验证；GitHub git 通道、GUI 入口渲染、讲解页视觉与交互仍待验证，详见「验证状态」。
 
 ## 功能
 
 | 能力 | 说明 |
 |---|---|
-| 可交互讲解页 | 单文件 HTML，含学习目标、概念、分步讲解、互动控件、常见误区、小结；无外部链接，断网可用 |
+| 可交互讲解页 | 单文件 HTML：学习目标、概念、分步讲解、互动控件、常见误区、小结；无外部链接，断网可用 |
 | 讲义 | Markdown，固定 5 章：学习目标 / 核心概念 / 例题精讲 / 常见错误 / 课后任务 |
 | 练习题 | Markdown，1–20 题，每题含题干、参考答案、≥2 句解析；题量 ≥2 时保证 ≥2 种题型 |
 
@@ -26,22 +26,29 @@
 - 宿主具备插件管理能力（Web 侧栏「插件」页，或创造模式的 `plugin_manager` 工具）；
 - 宿主进程能找到 `pnpm`（插件管理器用它安装依赖）。
 
-### 方式一：从 GitHub 安装（推荐）
+### 方式一：从 Release 安装（推荐，已验证）
 
-在创造模式会话中让 agent 调用 `plugin_manager` 的 `install_bundle`，`target` 指向本仓库的 tag 或 commit：
+1. 打开 [Releases](https://github.com/mmbxy/teacher-scenario-plugin/releases)，下载 `teacher-scenario-plugin-<version>.tgz`；
+2. 在创造模式会话中让 agent 调用 `plugin_manager` 的 `install_bundle`，`target` 指向该文件的**绝对路径**；
+3. 或使用 Web 侧栏「插件 → 添加插件」选择本地文件。
+
+优点：安装过程不访问 GitHub，不受网络波动影响。
+
+### 方式二：从 GitHub 安装（需要稳定的 GitHub 连通性）
+
+`install_bundle` 的 `target` 指向 tag 或 commit：
 
 ```
 git+https://github.com/mmbxy/teacher-scenario-plugin#v0.1.2
 ```
 
-> 请始终使用 tag 或 commit，不要用浮动分支。
+> 请使用 tag 或 commit，不要用浮动分支。若报 `Connection was reset` 或 `timed out after 5000ms`，请改用方式一。
 
-### 方式二：从 Release 安装
+### 方式三：通过 Web 插件页
 
-1. 在仓库 Releases 下载 `teacher-scenario-plugin-<version>.tgz`；
-2. `install_bundle` 的 `target` 指向该文件的绝对路径。
+侧栏「插件 → 添加插件」可安装随附/本地/远程包；具体输入形式取决于宿主版本。
 
-安装返回 `application: applied` 且无 `error` 才算成功；`restart-required` 表示需要重启宿主。装完可用只读的 `cordis_inspect_query` 确认 `teacher_generate_lesson` 已注册。
+安装返回 `application: applied` 且无 `error` 才算成功；`restart-required` 表示需要重启宿主。装完用只读的 `cordis_inspect_query` 查 `Tool` 确认 `teacher_generate_lesson` 已注册。
 
 ## 使用
 
@@ -51,29 +58,45 @@ git+https://github.com/mmbxy/teacher-scenario-plugin#v0.1.2
 
 产物在 `<会话工作目录>/teacher-artifacts/<lessonId>/`。也可以用输入区下方的「一键备课」条复制标准调用指令。
 
+## 验证状态
+
+| 项 | 状态 | 说明 |
+|---|---|---|
+| tarball 安装 | ✅ 已验证 | 安装返回 `applied`，版本 0.1.2 |
+| 工具注册与端到端生成 | ✅ 已验证 | 3 件产物、5 步讲解、6 题、讲义 5 章、无外链 |
+| GitHub git 安装 | ⚠️ 未验证 | 本机网络对 github.com 不稳定；隔离环境 `pnpm add git+ssh` 成功 |
+| GUI 入口渲染 | ⚠️ 未验证 | `client.js` 已随包安装，未在界面确认 |
+| 讲解页视觉与交互 | ⚠️ 未验证 | 仅做了静态结构与脚本语法检查 |
+| 干净环境（非 exFAT） | ⚠️ 未验证 | 本机 profile 位于 exFAT，需保留 hoisted 补丁 |
+
 ## 兼容性
 
-| 宿主 | 状态 |
+| 宿主 / 环境 | 状态 |
 |---|---|
-| DSH 0.2.1-rc.2 ＋ OFdesk 6.0.0-alpha.1（Web） | 已实测：安装、工具注册、端到端生成 |
-| 其他版本 | 未验证；`engines.dsh` 会做基础拦截 |
+| DSH `0.2.1-rc.2` ＋ OFdesk `6.0.0-alpha.1`（Web，Windows） | 已实测：安装、注册、生成 |
+| 其他 DSH 版本 | 未验证；`engines.dsh` 会做基础拦截 |
+| profile 位于 exFAT 卷 | 需要 hoisted 安装策略与本地 `@ofdesk/bundle` 覆盖；详见「本机排障」 |
 
 ## 已知限制
 
-- 只有「函数求导」是手写示范内容；**其它知识点走通用备课骨架**，给出的是可执行的教学步骤（抄定义、列条件、写正反例、归纳判定），**不会自动生成学科内容**；
-- 讲解页的视觉与滑块交互尚未在浏览器中验收；
+- 只有「函数求导」是手写示范内容；**其它知识点走通用备课骨架**，给出可执行的教学步骤（抄定义、列条件、写正反例、归纳判定），**不会自动生成学科内容**；
+- 讲解页视觉与滑块交互未在浏览器验收；
 - 「一键备课」条的 GUI 渲染尚未确认；
 - 界面与产物目前为中文。
 
 ## 本机排障（仅 exFAT 卷需要，普通用户忽略）
 
-如果 profile 位于 exFAT 卷，pnpm 无法创建符号链接，需要：`nodeLinker: hoisted`、把 `@ofdesk/bundle` 覆盖为本地副本、并用 tarball（而非目录）作为安装 target。否则会报 `ERR_PNPM_PACKAGE_MANAGER_SYMLINK_FAILED`。
+若 profile 位于 exFAT 卷，pnpm 无法创建符号链接，需要：`nodeLinker: hoisted`、把 `@ofdesk/bundle` 覆盖为本地副本、用 tarball（而非目录）作为安装 target。否则会报 `ERR_PNPM_PACKAGE_MANAGER_SYMLINK_FAILED`。
+
+## 常见问题
+
+见 [FAQ.md](FAQ.md)：pnpm 缺失、连接重置、5 秒预检、版本不兼容、重启后不生效、产物位置、升级与卸载等。
 
 ## 开发
 
 ```
 npm test        # 40 项单元测试
-npm run check   # 发布质量门（清单 / patch / locale / 入口 / 渲染 / 确定性）
+npm run check   # 发布质量门（清单 / patch / locale / 入口 / 渲染 / 确定性 / 文档链接）
 npm run verify  # 两者一起跑
 ```
 

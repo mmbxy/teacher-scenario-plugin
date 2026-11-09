@@ -211,6 +211,19 @@ await check('render.deterministic', async () => {
   return '逐字节一致';
 });
 
+await check('docs.links', () => {
+  for (const file of ['README.md', 'FAQ.md']) {
+    const text = read(file);
+    const links = [...text.matchAll(/\]\(([^)\s]+)\)/g)].map((match) => match[1]);
+    for (const link of links) {
+      if (/^(https?:|mailto:|#)/.test(link)) continue;
+      const target = link.split('#')[0];
+      assert(target && exists(target), `${file} 链接失效：${link}`);
+    }
+  }
+  return 'README / FAQ';
+});
+
 /* ---------------------------------------------------------------- 汇总 */
 
 let failed = 0;

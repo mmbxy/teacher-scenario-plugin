@@ -7,6 +7,7 @@
 - 仓库与发布准备：包名从 `@local/teacher-scenario-plugin` 改为 `teacher-scenario-plugin`，移除 `private`，改用 MIT 许可证，补齐 `repository` / `homepage` / `bugs` 字段。
 - 质量门重建：新增 `scripts/check.mjs`（16 项检查），替换与包结构失真的旧检查脚本；`npm run verify` 一次跑完测试与检查。
 - 新增 GitHub Actions CI（Node 20/22：单测、质量门、打包内容核对）。
+- 文档：安装顺序改为「Release tarball 优先、git 需稳定网络」，新增 FAQ、验证状态表与兼容性说明。
 - 仓库地址已回填为 `github.com/mmbxy/teacher-scenario-plugin`。
 
 ## [0.1.2] - 2026-11-09
