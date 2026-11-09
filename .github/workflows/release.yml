@@ -26,9 +26,9 @@ jobs:
         run: npm run check
 
       - name: Pack
-        run: npm pack --pack-destination dist
+        run: npm pack
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" dist/*.tgz --generate-notes --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" teacher-scenario-plugin-*.tgz --generate-notes --verify-tag
