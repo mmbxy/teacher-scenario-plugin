@@ -95,6 +95,10 @@ git+https://github.com/mmbxy/teacher-scenario-plugin#v0.1.2
 - 「一键备课」条的 GUI 渲染尚未确认；
 - 界面与产物目前为中文。
 
+## 路线图
+
+后续功能规划见 [ROADMAP.md](ROADMAP.md)：v0.2（面板/批量/导出/历史/专用模板）、v0.3（模型生成/教材对齐/组卷）、v0.4（课程包/课程建设材料）。
+
 ## 本机排障（仅 exFAT 卷需要，普通用户忽略）
 
 若 profile 位于 exFAT 卷，pnpm 无法创建符号链接，需要：`nodeLinker: hoisted`、把 `@ofdesk/bundle` 覆盖为本地副本、用 tarball（而非目录）作为安装 target。否则会报 `ERR_PNPM_PACKAGE_MANAGER_SYMLINK_FAILED`。
