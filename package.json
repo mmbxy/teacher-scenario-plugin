@@ -4,7 +4,7 @@
   "description": "一线教师场景化备课插件：输入知识点，生成可交互讲解页、讲义与练习题。/ Lesson kit for teachers: turn a topic into an interactive lesson page, handout and exercises.",
   "main": "index.mjs",
   "scripts": {
-    "test": "node --test tests/validate.test.js tests/generate.test.js tests/artifacts.test.js",
+    "test": "node --test tests/validate.test.js tests/generate.test.js tests/artifacts.test.js tests/kit-spec.test.js",
     "check": "node scripts/check.mjs",
     "verify": "npm test && npm run check"
   },

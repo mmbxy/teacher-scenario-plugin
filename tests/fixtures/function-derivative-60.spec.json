@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "函数求导-20261110020000",
+  "meta": {
+    "topic": "函数求导",
+    "durationMinutes": 60,
+    "teachingMode": "讲授",
+    "courseLevel": "本科基础",
+    "audience": "本科一年级",
+    "textbook": "",
+    "keyPoints": [
+      "概念",
+      "例题"
+    ],
+    "generatedAt": "2026-11-10T02:00:00.000Z",
+    "contentSource": "template",
+    "locale": "zh-CN"
+  },
+  "objectives": [
+    {
+      "id": "O1",
+      "text": "能写出导数的定义式，并解释其中极限的含义。",
+      "keywords": [
+        "导数",
+        "极限"
+      ]
+    },
+    {
+      "id": "O2",
+      "text": "能说明导数的几何意义：曲线在该点切线的斜率。",
+      "keywords": [
+        "切线",
+        "斜率"
+      ]
+    },
+    {
+      "id": "O3",
+      "text": "能用幂函数与多项式法则求导。",
+      "keywords": [
+        "幂函数",
+        "求导法则"
+      ]
+    },
+    {
+      "id": "O4",
+      "text": "会求曲线在某点处的切线方程。",
+      "keywords": [
+        "切线方程"
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "id": "intro",
+      "kind": "intro",
+      "title": "导入",
+      "startMinute": 0,
+      "endMinute": 5,
+      "durationMinutes": 5,
+      "isKeyPoint": false
+    },
+    {
+      "id": "concept",
+      "kind": "concept",
+      "title": "概念",
+      "startMinute": 5,
+      "endMinute": 19,
+      "durationMinutes": 14,
+      "isKeyPoint": true
+    },
+    {
+      "id": "derivation",
+      "kind": "derivation",
+      "title": "推导",
+      "startMinute": 19,
+      "endMinute": 35,
+      "durationMinutes": 16,
+      "isKeyPoint": false
+    },
+    {
+      "id": "example",
+      "kind": "example",
+      "title": "例题",
+      "startMinute": 35,
+      "endMinute": 46,
+      "durationMinutes": 11,
+      "isKeyPoint": true
+    },
+    {
+      "id": "interaction",
+      "kind": "interaction",
+      "title": "互动",
+      "startMinute": 46,
+      "endMinute": 53,
+      "durationMinutes": 7,
+      "isKeyPoint": false
+    },
+    {
+      "id": "summary",
+      "kind": "summary",
+      "title": "小结",
+      "startMinute": 53,
+      "endMinute": 57,
+      "durationMinutes": 4,
+      "isKeyPoint": false
+    },
+    {
+      "id": "homework",
+      "kind": "homework",
+      "title": "作业",
+      "startMinute": 57,
+      "endMinute": 60,
+      "durationMinutes": 3,
+      "isKeyPoint": false
+    }
+  ],
+  "sections": [
+    {
+      "id": "S1",
+      "timelineId": "intro",
+      "kind": "intro",
+      "title": "导入",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    },
+    {
+      "id": "S2",
+      "timelineId": "concept",
+      "kind": "concept",
+      "title": "概念",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    },
+    {
+      "id": "S3",
+      "timelineId": "derivation",
+      "kind": "derivation",
+      "title": "推导",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    },
+    {
+      "id": "S4",
+      "timelineId": "example",
+      "kind": "example",
+      "title": "例题",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    },
+    {
+      "id": "S5",
+      "timelineId": "interaction",
+      "kind": "interaction",
+      "title": "互动",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    },
+    {
+      "id": "S6",
+      "timelineId": "summary",
+      "kind": "summary",
+      "title": "小结",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    },
+    {
+      "id": "S7",
+      "timelineId": "homework",
+      "kind": "homework",
+      "title": "作业",
+      "keyPoints": [],
+      "content": "",
+      "wordCount": 0
+    }
+  ],
+  "examples": [
+    {
+      "id": "EX1",
+      "title": "例 1",
+      "problem": "（待内容生成）第 1 道例题题干。",
+      "steps": [
+        "步骤 1（待内容生成）",
+        "步骤 2（待内容生成）"
+      ],
+      "pitfalls": [
+        "（待内容生成）常见错误"
+      ],
+      "variant": "（待内容生成）变式题"
+    },
+    {
+      "id": "EX2",
+      "title": "例 2",
+      "problem": "（待内容生成）第 2 道例题题干。",
+      "steps": [
+        "步骤 1（待内容生成）",
+        "步骤 2（待内容生成）"
+      ],
+      "pitfalls": [
+        "（待内容生成）常见错误"
+      ],
+      "variant": "（待内容生成）变式题"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "IN1",
+      "prompt": "（待内容生成）互动问题 1",
+      "expectedWrong": [
+        "（待内容生成）预设错误回答"
+      ],
+      "correction": "（待内容生成）纠正话术",
+      "minutes": 4
+    },
+    {
+      "id": "IN2",
+      "prompt": "（待内容生成）互动问题 2",
+      "expectedWrong": [
+        "（待内容生成）预设错误回答"
+      ],
+      "correction": "（待内容生成）纠正话术",
+      "minutes": 4
+    },
+    {
+      "id": "IN3",
+      "prompt": "（待内容生成）互动问题 3",
+      "expectedWrong": [
+        "（待内容生成）预设错误回答"
+      ],
+      "correction": "（待内容生成）纠正话术",
+      "minutes": 4
+    }
+  ],
+  "exercises": [
+    {
+      "id": "Q1",
+      "level": "基础",
+      "type": "计算题",
+      "prompt": "（待内容生成）第 1 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q2",
+      "level": "基础",
+      "type": "概念题",
+      "prompt": "（待内容生成）第 2 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q3",
+      "level": "基础",
+      "type": "应用题",
+      "prompt": "（待内容生成）第 3 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q4",
+      "level": "基础",
+      "type": "判断题",
+      "prompt": "（待内容生成）第 4 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q5",
+      "level": "提高",
+      "type": "综合题",
+      "prompt": "（待内容生成）第 5 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q6",
+      "level": "提高",
+      "type": "计算题",
+      "prompt": "（待内容生成）第 6 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q7",
+      "level": "提高",
+      "type": "概念题",
+      "prompt": "（待内容生成）第 7 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    },
+    {
+      "id": "Q8",
+      "level": "拓展",
+      "type": "应用题",
+      "prompt": "（待内容生成）第 8 题题干。",
+      "answer": "（待内容生成）答案",
+      "explanation": "（待内容生成）解析"
+    }
+  ],
+  "boardPlan": {
+    "zones": [
+      "定义区",
+      "例题区",
+      "易错清单"
+    ],
+    "keySentences": [
+      "（待内容生成）关键板书句"
+    ],
+    "eraseStrategy": "定义与法则保留到下课；导入推导讲完可擦。"
+  },
+  "deckPages": 0,
+  "quality": {
+    "warnings": [],
+    "degraded": false,
+    "sources": [],
+    "checks": {}
+  }
+}
