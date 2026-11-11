@@ -24,7 +24,11 @@ function sectionLines(section) {
   const contentLines = plainText(section.content)
     .split(/\n+/)
     .map((line) => line.trim())
-    .filter((line) => line.length >= 4 && !/^[-—|]+$/.test(line));
+    .filter((line) => line.length >= 4 && !/^[-—|]+$/.test(line))
+    .filter((line) => !/^\d+\s*[–-]\s*\d+\s*分钟/.test(line))
+    .filter((line) => !/^\d+\s*[–-]\s*\d+\s+(导入|概念|推导|例题|互动|小结|作业)/.test(line))
+    .filter((line) => !/^时间段\s+环节/.test(line))
+    .filter((line) => line !== section.title);
   return Array.from(new Set([...keyPoints, ...contentLines]));
 }
 export function sectionNote(section, timeline = []) {
