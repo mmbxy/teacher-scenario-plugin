@@ -4,22 +4,27 @@ window.__ModuleLoader__.load({
     const React = require('react');
     const h = React.createElement;
 
-    const PROMPT = (topic) =>
-      '使用 teacher_generate_lesson 生成《' + topic + '》的可交互讲解页、讲义与 6 道基础练习题。';
+    const PROMPT = (topic, mode, duration) => {
+      if (mode === 'lesson') {
+        return '使用 teacher_generate_lesson 生成《' + topic + '》的可交互讲解页、讲义与 6 道基础练习题。';
+      }
+      return '使用 teacher_generate_lecture_kit 生成《' + topic + '》的 ' + duration + ' 分钟课时包（教案、讲义、练习、板书、互动，并导出 Word 与 PPT）。';
+    };
 
     /**
      * 一键备课入口：装载在 composer 下方的 dock 里。
      *
-     * 只做两件事：收集知识点、把标准调用指令复制到剪贴板。
-     * 真正的生成仍由 Host 工具 teacher_generate_lesson 完成，
-     * 因此这里不依赖额外的 Host 调用 API。
+     * 只做两件事：收集知识点/模式/时长、把标准调用指令复制到剪贴板。
+     * 真正的生成仍由 Host 工具完成；这里不依赖额外的 Host 调用 API。
      */
     function LessonDock() {
       const [topic, setTopic] = React.useState('函数求导');
+      const [mode, setMode] = React.useState('kit');
+      const [duration, setDuration] = React.useState('60');
       const [copied, setCopied] = React.useState(false);
 
       const copy = React.useCallback(async () => {
-        const text = PROMPT(topic.trim() || '函数求导');
+        const text = PROMPT(topic.trim() || '函数求导', mode, duration);
         try {
           await navigator.clipboard.writeText(text);
         } catch {
@@ -32,7 +37,16 @@ window.__ModuleLoader__.load({
         }
         setCopied(true);
         window.setTimeout(() => setCopied(false), 2000);
-      }, [topic]);
+      }, [topic, mode, duration]);
+
+      const selectStyle = {
+        padding: '4px 6px',
+        border: '1px solid color-mix(in srgb, currentColor 22%, transparent)',
+        borderRadius: '6px',
+        background: 'transparent',
+        color: 'inherit',
+        fontSize: '12px',
+      };
 
       return h(
         'div',
@@ -66,6 +80,31 @@ window.__ModuleLoader__.load({
             fontSize: '12px',
           },
         }),
+        h(
+          'select',
+          {
+            value: mode,
+            onChange: (event) => setMode(event.target.value),
+            'aria-label': '生成模式',
+            style: selectStyle,
+          },
+          h('option', { value: 'kit' }, '课时包'),
+          h('option', { value: 'lesson' }, '三件套'),
+        ),
+        mode === 'kit'
+          ? h(
+              'select',
+              {
+                value: duration,
+                onChange: (event) => setDuration(event.target.value),
+                'aria-label': '课时长度',
+                style: selectStyle,
+              },
+              h('option', { value: '45' }, '45 分钟'),
+              h('option', { value: '60' }, '60 分钟'),
+              h('option', { value: '90' }, '90 分钟'),
+            )
+          : null,
         h(
           'button',
           {

@@ -180,7 +180,7 @@ function createLessonSpec(input, deps = {}) {
 
   const spec = {
     schemaVersion: SCHEMA_VERSION,
-    lessonId: `${slugForTopic(topic)}-${lessonStamp(now)}`,
+    lessonId: `${slugForTopic(topic)}-${lessonStamp(now)}-${durationMinutes}min`,
     meta: {
       topic,
       durationMinutes,
