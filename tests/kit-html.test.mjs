@@ -26,6 +26,7 @@ test('HTML：教师版含答案，学生版不输出答案节点', () => {
   assert.match(teacher, /查看答案/);
   assert.doesNotMatch(student, /查看答案/);
   assert.doesNotMatch(student, /class="answer"/);
+  assert.doesNotMatch(student, /答案：/);
   assert.match(teacher, /class="answer"/);
 });
 

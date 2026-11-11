@@ -63,7 +63,9 @@ function plainText(input) {
 
 /** 学生版应剔除的教师支架行（答案/解析/纠正/预设错误）。 */
 function isTeacherOnlyLine(input) {
-  return /^(?:[-*]\s*)?(?:\*\*)?(答案|参考答案|解析|纠正|预设错误)(?:话术)?(?:\*\*)?[：:]/.test(String(input || '').trim());
+  const text = String(input || '').trim();
+  return /^(?:[-*]\s*)?(?:\*\*)?(答案|参考答案|解析|纠正|预设错误)(?:话术)?(?:\*\*)?[：:]/.test(text)
+    || /(?:答案|参考答案|解析|纠正|预设错误)(?:话术)?[：:]/.test(text);
 }
 
 /** 内容包前导/规划行：学习目标复述、合计字数、时间表。 */
