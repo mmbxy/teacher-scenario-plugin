@@ -1,10 +1,11 @@
 import path from 'node:path';
-import { mkdir, writeFile } from 'node:fs/promises';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 
 import generateModule from './src/generate.js';
+import io from './src/kit/io.js';
 
 const { generateLesson } = generateModule;
+const { writeOutput } = io;
 
 /** Stable Loader identity. */
 export const name = 'teacher-scenario-plugin';
@@ -127,10 +128,7 @@ export function apply(ctx, config = {}) {
         now: () => Date.now(),
         outputDir,
         timeoutMs,
-        async writeFile(target, content) {
-          await mkdir(path.dirname(target), { recursive: true });
-          await writeFile(target, content, 'utf8');
-        }
+        writeFile: writeOutput
       });
 
       if (!result.ok) {
