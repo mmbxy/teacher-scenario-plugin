@@ -9,7 +9,11 @@
  *  - 找不到内容包时返回 TEMPLATE_MISSING，由上层降级。
  */
 
-const defaultPacks = [require('./content/function-derivative-60.json')];
+const defaultPacks = [
+  require('./content/function-derivative-45.json'),
+  require('./content/function-derivative-60.json'),
+  require('./content/function-derivative-90.json')
+];
 
 const CONTENT_SOURCE = 'template';
 

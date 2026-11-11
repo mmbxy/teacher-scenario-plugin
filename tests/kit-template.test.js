@@ -57,6 +57,33 @@ test('TemplateProvider：同一输入两次填充结果一致', () => {
   assert.equal(first, second);
 });
 
+test('TemplateProvider：填充 45 分钟后通过 full 校验', () => {
+  const provider = createTemplateProvider();
+  const spec = makeSpec('函数求导', 45);
+  const result = provider.fill(spec);
+  assert.equal(result.ok, true, result.message);
+  const filled = result.spec;
+  assert.equal(filled.interactions.length, 3);
+  assert.equal(filled.exercises.length, 6);
+  assert.ok(filled.sections.reduce((sum, section) => sum + section.wordCount, 0) >= 4500);
+  const validation = validateLessonSpec(filled, { mode: 'full' });
+  assert.equal(validation.ok, true, JSON.stringify(validation.errors, null, 2));
+});
+
+test('TemplateProvider：填充 90 分钟后通过 full 校验', () => {
+  const provider = createTemplateProvider();
+  const spec = makeSpec('函数求导', 90);
+  const result = provider.fill(spec);
+  assert.equal(result.ok, true, result.message);
+  const filled = result.spec;
+  assert.equal(filled.examples.length, 3);
+  assert.equal(filled.interactions.length, 5);
+  assert.equal(filled.exercises.length, 12);
+  assert.ok(filled.sections.reduce((sum, section) => sum + section.wordCount, 0) >= 9000);
+  const validation = validateLessonSpec(filled, { mode: 'full' });
+  assert.equal(validation.ok, true, JSON.stringify(validation.errors, null, 2));
+});
+
 test('TemplateProvider：缺少内容包时返回 TEMPLATE_MISSING', () => {
   const provider = createTemplateProvider();
   const spec = makeSpec('矩阵的秩', 60);

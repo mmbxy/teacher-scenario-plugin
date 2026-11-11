@@ -57,7 +57,8 @@ export async function renderPptx(spec, options = {}) {
   cover.addNotes('开场：说明本节目标与时间分配。');
 
   sections.forEach((section) => {
-    const lines = sectionLines(section).slice(0, 16);
+    const maxPages = meta.durationMinutes === 90 ? 6 : 4;
+    const lines = sectionLines(section).slice(0, maxPages * 4);
     const groups = lines.length > 0 ? chunk(lines, 4) : [['（内容待填充）']];
     groups.forEach((group, pageIndex) => {
       const slide = pptx.addSlide();
