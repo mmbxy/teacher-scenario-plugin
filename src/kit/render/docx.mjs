@@ -5,7 +5,7 @@
 
 import textModule from './text.js';
 
-const { plainText } = textModule;
+const { plainText, isTeacherOnlyLine, isPlanningLine } = textModule;
 
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -50,7 +50,10 @@ export async function renderDocx(spec, options = {}) {
   children.push(new Paragraph({ text: '分节内容', heading: HeadingLevel.HEADING_1 }));
   sections.forEach((section) => {
     children.push(new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_2 }));
-    lines(section.content).forEach((text) => children.push(new Paragraph({ text: plainText(text) })));
+    lines(section.content)
+      .filter((text) => !isPlanningLine(text))
+      .filter((text) => showAnswers || !isTeacherOnlyLine(text))
+      .forEach((text) => children.push(new Paragraph({ text: plainText(text) })));
     (Array.isArray(section.keyPoints) ? section.keyPoints : []).forEach((point) => {
       children.push(new Paragraph({ text: `• ${plainText(point)}`, indent: { left: 360 } }));
     });

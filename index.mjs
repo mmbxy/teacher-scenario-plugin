@@ -146,7 +146,7 @@ export function apply(ctx, config = {}) {
   ctx.tools.register(defineTool({
     name: 'teacher_generate_lecture_kit',
     description:
-      '生成 45/60/90 分钟课时包：教案、学生讲义、分层作业、板书、互动脚本，以及 DOCX/PPTX（默认全出），每份返回绝对路径。当前仅支持「函数求导」的三档内容包。',
+      '生成 45/60/90 分钟课时包：教案、学生讲义、分层作业、板书、互动脚本、单文件 HTML，以及 DOCX/PPTX。默认同时输出教师版与学生版（各 8 件，分 teacher/student 子目录），每份返回绝对路径。当前仅支持「函数求导」的三档内容包。',
     parameters: {
       topic: {
         type: 'string',
@@ -187,6 +187,17 @@ export function apply(ctx, config = {}) {
         type: 'boolean',
         default: true,
         description: '是否导出 PPTX，默认 true。'
+      },
+      withHtml: {
+        type: 'boolean',
+        default: true,
+        description: '是否导出单文件 HTML，默认 true。'
+      },
+      edition: {
+        type: 'string',
+        enum: ['teacher', 'student', 'both'],
+        default: 'both',
+        description: '版本：teacher 教师版 / student 学生版 / both 两套都出，默认 both。两套分别放在 teacher/ 与 student/ 子目录。'
       }
     },
     output: {
@@ -207,6 +218,7 @@ export function apply(ctx, config = {}) {
               properties: {
                 type: { type: 'string', required: true },
                 format: { type: 'string', required: true },
+                edition: { type: 'string' },
                 path: { type: 'string', required: true },
                 bytes: { type: 'integer' }
               }
@@ -221,7 +233,7 @@ export function apply(ctx, config = {}) {
         const lines = [
           `已生成 ${value.durationMinutes} 分钟课时包（${value.lessonId}）：`,
           `讲稿 ${value.words} 字，课件计划 ${value.deckPages} 页。`,
-          ...value.artifacts.map((artifact) => `- ${artifact.type}（${artifact.format}）：${artifact.path}`),
+          ...value.artifacts.map((artifact) => `- ${artifact.edition}/${artifact.type}（${artifact.format}）：${artifact.path}`),
           ...(value.warnings.length > 0 ? ['', '提示：', ...value.warnings.map((warning) => `- ${warning}`)] : [])
         ];
         return [{ type: 'text', text: lines.join('\n') }];

@@ -6,10 +6,11 @@
 import markdownModule from './markdown.js';
 import { renderDocx } from './docx.mjs';
 import { renderPptx } from './pptx.mjs';
+import { renderHtml } from './html.mjs';
 
 const { renderMarkdown } = markdownModule;
 
-const FORMATS = Object.freeze(['markdown', 'docx', 'pptx']);
+const FORMATS = Object.freeze(['markdown', 'docx', 'pptx', 'html']);
 
 /**
  * @param {object} spec
@@ -30,8 +31,11 @@ export async function renderKit(spec, options = {}) {
   if (formats.includes('pptx')) {
     files.push({ name: 'lecture-kit.pptx', content: await renderPptx(spec, { audience }) });
   }
+  if (formats.includes('html')) {
+    files.push({ name: 'lecture-kit.html', content: renderHtml(spec, { audience }) });
+  }
 
   return files;
 }
 
-export { FORMATS, renderMarkdown, renderDocx, renderPptx };
+export { FORMATS, renderMarkdown, renderDocx, renderPptx, renderHtml };

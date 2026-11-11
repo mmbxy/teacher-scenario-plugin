@@ -5,7 +5,7 @@
 
 import textModule from './text.js';
 
-const { plainText } = textModule;
+const { plainText, isTeacherOnlyLine, isPlanningLine } = textModule;
 
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -17,7 +17,7 @@ function chunk(items, size) {
   return chunks;
 }
 
-function sectionLines(section) {
+function sectionLines(section, audience) {
   const keyPoints = (Array.isArray(section.keyPoints) ? section.keyPoints : [])
     .map((item) => plainText(item))
     .filter((item) => item.length > 0);
@@ -28,7 +28,9 @@ function sectionLines(section) {
     .filter((line) => !/^\d+\s*[–-]\s*\d+\s*分钟/.test(line))
     .filter((line) => !/^\d+\s*[–-]\s*\d+\s+(导入|概念|推导|例题|互动|小结|作业)/.test(line))
     .filter((line) => !/^时间段\s+环节/.test(line))
-    .filter((line) => line !== section.title);
+    .filter((line) => !isPlanningLine(line))
+    .filter((line) => line !== section.title)
+    .filter((line) => audience !== 'student' || !isTeacherOnlyLine(line));
   return Array.from(new Set([...keyPoints, ...contentLines]));
 }
 export function sectionNote(section, timeline = []) {
@@ -44,6 +46,7 @@ export async function renderPptx(spec, options = {}) {
   const meta = spec.meta || {};
   const objectives = Array.isArray(spec.objectives) ? spec.objectives : [];
   const sections = Array.isArray(spec.sections) ? spec.sections : [];
+  const showNotes = options.audience !== 'student';
 
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
@@ -58,11 +61,11 @@ export async function renderPptx(spec, options = {}) {
   cover.addText(`${meta.teachingMode || '讲授'} · ${meta.durationMinutes || 0} 分钟 · ${meta.courseLevel || '本科基础'}`, {
     x: 0.8, y: 2.9, w: 11.8, h: 0.6, fontSize: 22, color: '2E6FB7', fontFace: 'Microsoft YaHei'
   });
-  cover.addNotes('开场：说明本节目标与时间分配。');
+  if (showNotes) cover.addNotes('开场：说明本节目标与时间分配。');
 
   sections.forEach((section) => {
     const maxPages = meta.durationMinutes === 90 ? 6 : 4;
-    const lines = sectionLines(section).slice(0, maxPages * 4);
+    const lines = sectionLines(section, options.audience).slice(0, maxPages * 4);
     const groups = lines.length > 0 ? chunk(lines, 4) : [['（内容待填充）']];
     groups.forEach((group, pageIndex) => {
       const slide = pptx.addSlide();
@@ -74,7 +77,7 @@ export async function renderPptx(spec, options = {}) {
           x: 0.9, y: 1.5 + index * 0.9, w: 11.4, h: 0.75, fontSize: 20, color: '1E293B', fontFace: 'Microsoft YaHei'
         });
       });
-      slide.addNotes(sectionNote(section, spec.timeline));
+      if (showNotes) slide.addNotes(sectionNote(section, spec.timeline));
     });
   });
 
@@ -87,7 +90,7 @@ export async function renderPptx(spec, options = {}) {
       x: 0.9, y: 1.5 + index * 0.75, w: 11.4, h: 0.65, fontSize: 20, color: '1E293B', fontFace: 'Microsoft YaHei'
     });
   });
-  summary.addNotes('总结目标达成情况，布置分层作业。');
+  if (showNotes) summary.addNotes('总结目标达成情况，布置分层作业。');
 
   return pptx.write({ outputType: 'nodebuffer' });
 }

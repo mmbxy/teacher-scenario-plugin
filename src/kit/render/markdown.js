@@ -9,11 +9,20 @@ function line(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function studentContent(content, audience) {
+  if (audience !== 'student') return content;
+  return String(content || '')
+    .split('\n')
+    .filter((item) => !/^(答案|参考答案|解析|纠正|预设错误)[：:]/.test(item.trim()))
+    .join('\n');
+}
+
 function listOrEmpty(items) {
   return Array.isArray(items) ? items.filter((item) => line(item).length > 0) : [];
 }
 
-function renderLecturePlan(spec) {
+function renderLecturePlan(spec, options = {}) {
+  const audience = options.audience === 'student' ? 'student' : 'teacher';
   const meta = spec.meta || {};
   const timeline = Array.isArray(spec.timeline) ? spec.timeline : [];
   const objectives = Array.isArray(spec.objectives) ? spec.objectives : [];
@@ -42,7 +51,7 @@ function renderLecturePlan(spec) {
     parts.push(`### ${section.title}`);
     const keyPoints = listOrEmpty(section.keyPoints);
     if (keyPoints.length > 0) keyPoints.forEach((point) => parts.push(`- ${point}`));
-    if (line(section.content)) parts.push('', section.content);
+    if (line(section.content)) parts.push('', studentContent(section.content, audience));
     parts.push('');
   });
   parts.push('## 例题');
@@ -68,7 +77,8 @@ function renderLecturePlan(spec) {
   return parts.join('\n');
 }
 
-function renderHandout(spec) {
+function renderHandout(spec, options = {}) {
+  const audience = options.audience === 'student' ? 'student' : 'teacher';
   const meta = spec.meta || {};
   const objectives = Array.isArray(spec.objectives) ? spec.objectives : [];
   const sections = Array.isArray(spec.sections) ? spec.sections : [];
@@ -80,7 +90,7 @@ function renderHandout(spec) {
   parts.push('');
   sections.forEach((section) => {
     parts.push(`## ${section.title}`);
-    if (line(section.content)) parts.push('', section.content);
+    if (line(section.content)) parts.push('', studentContent(section.content, audience));
     parts.push('');
   });
   return parts.join('\n');
@@ -113,14 +123,19 @@ function renderBoard(spec) {
   return parts.join('\n');
 }
 
-function renderInteraction(spec) {
+function renderInteraction(spec, options = {}) {
+  const audience = options.audience === 'student' ? 'student' : 'teacher';
   const interactions = Array.isArray(spec.interactions) ? spec.interactions : [];
   const parts = [`# ${spec.meta && spec.meta.topic ? spec.meta.topic : '课时'} · 互动脚本`, ''];
   interactions.forEach((item, index) => {
     parts.push(`## 互动 ${index + 1}`);
     parts.push(`- 问题：${item.prompt || ''}`);
-    listOrEmpty(item.expectedWrong).forEach((wrong) => parts.push(`- 预设错误：${wrong}`));
-    parts.push(`- 纠正：${item.correction || ''}`);
+    if (audience === 'teacher') {
+      listOrEmpty(item.expectedWrong).forEach((wrong) => parts.push(`- 预设错误：${wrong}`));
+      parts.push(`- 纠正：${item.correction || ''}`);
+    } else {
+      parts.push('- 请先独立思考，再参与课堂讨论。');
+    }
     parts.push('');
   });
   return parts.join('\n');
@@ -129,11 +144,11 @@ function renderInteraction(spec) {
 function renderMarkdown(spec, options = {}) {
   const audience = options.audience === 'student' ? 'student' : 'teacher';
   const files = [
-    { name: 'lecture-plan.md', content: renderLecturePlan(spec) },
-    { name: 'handout.md', content: renderHandout(spec) },
+    { name: 'lecture-plan.md', content: renderLecturePlan(spec, { audience }) },
+    { name: 'handout.md', content: renderHandout(spec, { audience }) },
     { name: 'exercises.md', content: renderExercises(spec, { audience }) },
     { name: 'board.md', content: renderBoard(spec) },
-    { name: 'interaction.md', content: renderInteraction(spec) }
+    { name: 'interaction.md', content: renderInteraction(spec, { audience }) }
   ];
   return files;
 }

@@ -61,4 +61,18 @@ function plainText(input) {
   return mathToText(stripMarkdown(input));
 }
 
-module.exports = { plainText, stripMarkdown, mathToText };
+/** 学生版应剔除的教师支架行（答案/解析/纠正/预设错误）。 */
+function isTeacherOnlyLine(input) {
+  return /^(?:[-*]\s*)?(?:\*\*)?(答案|参考答案|解析|纠正|预设错误)(?:话术)?(?:\*\*)?[：:]/.test(String(input || '').trim());
+}
+
+/** 内容包前导/规划行：学习目标复述、合计字数、时间表。 */
+function isPlanningLine(input) {
+  const text = String(input || '').trim();
+  if (/^合计约/.test(text)) return true;
+  if (/^\d+\.\s*(能|会|理解|掌握)/.test(text)) return true;
+  if (/^时间段\s+环节/.test(text)) return true;
+  return false;
+}
+
+module.exports = { plainText, stripMarkdown, mathToText, isTeacherOnlyLine, isPlanningLine };
