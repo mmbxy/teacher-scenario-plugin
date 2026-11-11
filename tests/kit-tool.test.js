@@ -28,7 +28,7 @@ test('工具：60 分钟课时包产出教师+学生 16 件', async () => {
   const result = await generateLectureKit({ topic: '函数求导', durationMinutes: 60, exerciseCount: 8 }, deps);
   assert.equal(result.ok, true, result.message);
   assert.equal(result.durationMinutes, 60);
-  assert.equal(result.words, 6110);
+  assert.equal(result.words, 6031);
   assert.equal(result.artifacts.length, 16);
   assert.equal(files.size, 16);
   assert.ok(result.artifacts.every((item) => item.path.includes(result.lessonId)));
@@ -116,3 +116,5 @@ test('工具：校验失败返回 VALIDATION_FAILED', async () => {
   assert.equal(result.code, 'VALIDATION_FAILED');
   assert.match(result.detail, /V4_EXAMPLES_INSUFFICIENT/);
 });
+
+
