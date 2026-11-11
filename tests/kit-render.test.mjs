@@ -8,7 +8,10 @@ import { fileURLToPath } from 'node:url';
 import markdownModule from '../src/kit/render/markdown.js';
 import { renderKit } from '../src/kit/render/index.mjs';
 import { sectionNote } from '../src/kit/render/pptx.mjs';
+import textModule from '../src/kit/render/text.js';
 import io from '../src/kit/io.js';
+
+const { plainText } = textModule;
 
 const { renderMarkdown } = markdownModule;
 const { writeOutput } = io;
@@ -81,4 +84,11 @@ test('PPTX 备注：时长从时间轴读取，不出现 0 分钟', () => {
   const note = sectionNote(section, fixture.timeline);
   assert.match(note, /建议时长 5 分钟/);
   assert.doesNotMatch(note, /建议时长 0 分钟/);
+});
+
+test('纯文本化：保留 |x|，删除表格行，去掉 Markdown 标题与公式符号', () => {
+  assert.equal(plainText('### 4.1 定义'), '4.1 定义');
+  assert.equal(plainText('可导 ⇒ 连续，连续 ⇏ 可导（|x| 在 0 点）'), '可导 ⇒ 连续，连续 ⇏ 可导（|x| 在 0 点）');
+  assert.equal(plainText('| 时间段 | 环节 |\n|---|---|\n| 0–5 | 导入 |'), '时间段 环节\n0–5 导入');
+  assert.equal(plainText('$(x^n)′=nx^{n-1}$'), '(xⁿ)′=nxⁿ⁻¹');
 });

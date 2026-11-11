@@ -3,16 +3,35 @@
  * pptxgenjs 4.x 的多行文本不接受纯字符串数组，这里逐行 addText。
  */
 
+import textModule from './text.js';
+
+const { plainText } = textModule;
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-/** 从时间轴取本节时长；section 本身不存 durationMinutes。 */
+function chunk(items, size) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += size) chunks.push(items.slice(index, index + size));
+  return chunks;
+}
+
+function sectionLines(section) {
+  const keyPoints = (Array.isArray(section.keyPoints) ? section.keyPoints : [])
+    .map((item) => plainText(item))
+    .filter((item) => item.length > 0);
+  const contentLines = plainText(section.content)
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line.length >= 4 && !/^[-—|]+$/.test(line));
+  return Array.from(new Set([...keyPoints, ...contentLines]));
+}
 export function sectionNote(section, timeline = []) {
   const slot = timeline.find((item) => item.id === section.timelineId);
   const minutes = slot && Number.isInteger(slot.durationMinutes) ? slot.durationMinutes : 0;
-  const goal = clean(section.content).split(/\n+/).find((line) => line.length > 0) || '内容待填充';
-  return `本节：${section.title}；建议时长 ${minutes} 分钟。要点：${goal.slice(0, 60)}`;
+  const goal = plainText(section.content).split(/\n+/).find((line) => line.length > 0) || '内容待填充';
+  return `本节：${section.title}；建议时长 ${minutes} 分钟。要点：${goal.slice(0, 80)}`;
 }
 
 export async function renderPptx(spec, options = {}) {
@@ -38,19 +57,20 @@ export async function renderPptx(spec, options = {}) {
   cover.addNotes('开场：说明本节目标与时间分配。');
 
   sections.forEach((section) => {
-    const slide = pptx.addSlide();
-    slide.addText(section.title, {
-      x: 0.6, y: 0.4, w: 12, h: 0.8, fontSize: 30, bold: true, color: '1F3A5F', fontFace: 'Microsoft YaHei'
-    });
-    const keyPoints = (Array.isArray(section.keyPoints) ? section.keyPoints : []).filter((item) => clean(item));
-    const content = clean(section.content);
-    const bullets = keyPoints.length > 0 ? keyPoints : content ? content.split(/\n+/).slice(0, 6) : ['（内容待填充）'];
-    bullets.slice(0, 6).forEach((text, index) => {
-      slide.addText(text, {
-        x: 0.9, y: 1.5 + index * 0.75, w: 11.4, h: 0.65, fontSize: 20, color: '1E293B', fontFace: 'Microsoft YaHei'
+    const lines = sectionLines(section).slice(0, 16);
+    const groups = lines.length > 0 ? chunk(lines, 4) : [['（内容待填充）']];
+    groups.forEach((group, pageIndex) => {
+      const slide = pptx.addSlide();
+      slide.addText(pageIndex === 0 ? section.title : `${section.title}（续 ${pageIndex}）`, {
+        x: 0.6, y: 0.4, w: 12, h: 0.8, fontSize: 30, bold: true, color: '1F3A5F', fontFace: 'Microsoft YaHei'
       });
+      group.forEach((text, index) => {
+        slide.addText(text, {
+          x: 0.9, y: 1.5 + index * 0.9, w: 11.4, h: 0.75, fontSize: 20, color: '1E293B', fontFace: 'Microsoft YaHei'
+        });
+      });
+      slide.addNotes(sectionNote(section, spec.timeline));
     });
-    slide.addNotes(sectionNote(section, spec.timeline));
   });
 
   const summary = pptx.addSlide();
@@ -58,7 +78,7 @@ export async function renderPptx(spec, options = {}) {
     x: 0.6, y: 0.4, w: 12, h: 0.8, fontSize: 30, bold: true, color: '1F3A5F', fontFace: 'Microsoft YaHei'
   });
   objectives.slice(0, 4).forEach((item, index) => {
-    summary.addText(item.text, {
+    summary.addText(plainText(item.text), {
       x: 0.9, y: 1.5 + index * 0.75, w: 11.4, h: 0.65, fontSize: 20, color: '1E293B', fontFace: 'Microsoft YaHei'
     });
   });

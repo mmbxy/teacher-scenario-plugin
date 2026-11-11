@@ -3,6 +3,10 @@
  * docx 是 ESM，因此在函数内动态 import，避免 CommonJS 入口加载失败。
  */
 
+import textModule from './text.js';
+
+const { plainText } = textModule;
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -46,31 +50,31 @@ export async function renderDocx(spec, options = {}) {
   children.push(new Paragraph({ text: '分节内容', heading: HeadingLevel.HEADING_1 }));
   sections.forEach((section) => {
     children.push(new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_2 }));
-    lines(section.content).forEach((text) => children.push(new Paragraph({ text })));
+    lines(section.content).forEach((text) => children.push(new Paragraph({ text: plainText(text) })));
     (Array.isArray(section.keyPoints) ? section.keyPoints : []).forEach((point) => {
-      children.push(new Paragraph({ text: `• ${point}`, indent: { left: 360 } }));
+      children.push(new Paragraph({ text: `• ${plainText(point)}`, indent: { left: 360 } }));
     });
   });
 
   children.push(new Paragraph({ text: '例题', heading: HeadingLevel.HEADING_1 }));
   examples.forEach((item, index) => {
     children.push(new Paragraph({ text: `例 ${index + 1}：${item.title || ''}`, heading: HeadingLevel.HEADING_2 }));
-    if (clean(item.problem)) children.push(new Paragraph({ text: item.problem }));
+    if (clean(item.problem)) children.push(new Paragraph({ text: plainText(item.problem) }));
     (Array.isArray(item.steps) ? item.steps : []).forEach((step, stepIndex) => {
-      children.push(new Paragraph({ text: `${stepIndex + 1}. ${step}` }));
+      children.push(new Paragraph({ text: `${stepIndex + 1}. ${plainText(step)}` }));
     });
     (Array.isArray(item.pitfalls) ? item.pitfalls : []).forEach((pitfall) => {
-      children.push(new Paragraph({ text: `易错点：${pitfall}` }));
+      children.push(new Paragraph({ text: `易错点：${plainText(pitfall)}` }));
     });
   });
 
   children.push(new Paragraph({ text: '作业', heading: HeadingLevel.HEADING_1 }));
   exercises.forEach((item, index) => {
     children.push(new Paragraph({ text: `第 ${index + 1} 题（${item.level || ''} / ${item.type || ''}）` }));
-    children.push(new Paragraph({ text: item.prompt || '' }));
+    children.push(new Paragraph({ text: plainText(item.prompt) }));
     if (showAnswers) {
-      children.push(new Paragraph({ text: `答案：${item.answer || ''}` }));
-      children.push(new Paragraph({ text: `解析：${item.explanation || ''}` }));
+      children.push(new Paragraph({ text: `答案：${plainText(item.answer)}` }));
+      children.push(new Paragraph({ text: `解析：${plainText(item.explanation)}` }));
     }
   });
 
