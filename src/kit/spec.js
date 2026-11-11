@@ -62,7 +62,7 @@ function buildExamples(durationMinutes) {
 }
 
 function buildInteractions(durationMinutes) {
-  const count = durationMinutes === 90 ? 5 : durationMinutes === 60 ? 3 : 2;
+  const count = durationMinutes === 90 ? 5 : durationMinutes === 60 ? 3 : 3;
   return Array.from({ length: count }, (_, index) => ({
     id: `IN${index + 1}`,
     prompt: `（待内容生成）互动问题 ${index + 1}`,

@@ -69,6 +69,13 @@ test('时间轴：重点加权后总时长不变，且命中环节被标记', ()
   assert.ok(concept.durationMinutes >= base.timeline.find((slot) => slot.kind === 'concept').durationMinutes);
 });
 
+test('LessonSpec：45 分钟档生成至少 3 个互动（D23）', () => {
+  const result = createLessonSpec({ topic: '函数求导', durationMinutes: 45 }, { now: () => FIXED_NOW });
+  assert.equal(result.ok, true);
+  assert.equal(result.spec.interactions.length, 3);
+  assert.equal(validateLessonSpec(result.spec).ok, true);
+});
+
 test('时间轴：不支持的长度返回 INVALID_DURATION', () => {
   for (const duration of [30, 0, -45, 120, 59.5, '60']) {
     const result = allocateTimeline({ durationMinutes: duration });

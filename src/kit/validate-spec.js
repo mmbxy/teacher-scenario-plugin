@@ -12,7 +12,7 @@ const { MIN_MINUTES, SUPPORTED_DURATIONS, KINDS } = require('./timeline');
 const { EXERCISE_LEVELS } = require('./spec');
 
 const MIN_EXAMPLES = Object.freeze({ 45: 2, 60: 2, 90: 3 });
-const MIN_INTERACTIONS = Object.freeze({ 45: 2, 60: 3, 90: 5 });
+const MIN_INTERACTIONS = Object.freeze({ 45: 3, 60: 3, 90: 5 });
 const MIN_EXERCISES = Object.freeze({ 45: 6, 60: 8, 90: 12 });
 const MIN_DECK_PAGES = Object.freeze({ 45: 20, 60: 25, 90: 35 });
 const WORDS_PER_MINUTE = 100;

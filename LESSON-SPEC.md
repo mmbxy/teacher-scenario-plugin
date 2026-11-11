@@ -14,7 +14,7 @@
 | `timeline` | array | 是 | 7 个环节，首尾相接，合计 = 时长 |
 | `sections` | array | 是 | 与 timeline 一一对应；含 `timelineId/kind/title/keyPoints/content/wordCount` |
 | `examples` | array | 是 | 45/60 分钟 ≥2，90 分钟 ≥3；含步骤与易错点 |
-| `interactions` | array | 是 | 45/60/90 分钟分别 ≥2/3/5；含预设错误回答 |
+| `interactions` | array | 是 | 45/60/90 分钟分别 ≥3/3/5；含预设错误回答 |
 | `exercises` | array | 是 | 45/60/90 分钟分别 ≥6/8/12；三层齐全 |
 | `boardPlan` | object | 是 | 分区、关键句、擦除策略 |
 | `deckPages` | number | 是 | 结构模式下可为 0；full 模式校验下限 |
