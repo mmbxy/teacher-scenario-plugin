@@ -81,6 +81,15 @@ async function generateLectureKit(input, deps) {
   const filled = provider.fill(built.spec);
   if (!filled.ok) return failure(filled.code, filled.message, filled.detail);
 
+  const requestedCount = input.exerciseCount;
+  if (Number.isInteger(requestedCount) && requestedCount > filled.spec.exercises.length) {
+    return failure(
+      'EXERCISE_COUNT_UNSUPPORTED',
+      `当前内容包最多 ${filled.spec.exercises.length} 道题，无法生成 ${requestedCount} 道。`,
+      `requested=${requestedCount};available=${filled.spec.exercises.length}`
+    );
+  }
+
   const validation = validateLessonSpec(filled.spec, { mode: 'full' });
   if (!validation.ok) {
     const first = validation.errors[0] || { code: 'VALIDATION_FAILED', path: '', message: '校验失败' };

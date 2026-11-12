@@ -81,6 +81,14 @@ test('工具：非法时长返回 INVALID_DURATION', async () => {
   assert.equal(result.code, 'INVALID_DURATION');
 });
 
+test('工具：超出内容包题量返回 EXERCISE_COUNT_UNSUPPORTED', async () => {
+  const { deps } = makeDeps();
+  const result = await generateLectureKit({ topic: '函数求导', durationMinutes: 60, exerciseCount: 20 }, deps);
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'EXERCISE_COUNT_UNSUPPORTED');
+  assert.match(result.message, /最多 8 道/);
+});
+
 test('工具：未知知识点返回 TEMPLATE_MISSING', async () => {
   const { deps } = makeDeps();
   const result = await generateLectureKit({ topic: '矩阵的秩', durationMinutes: 60 }, deps);

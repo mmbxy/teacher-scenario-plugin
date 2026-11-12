@@ -55,7 +55,7 @@ window.__ModuleLoader__.load({
         const lessonMatch = text.match(/函数求导-\d{8,}-\d+min/);
         const pathMatches = text.match(/[A-Za-z]:[\\/][^\s"'<>]+?\.(?:md|docx|pptx|html)/g) || [];
         if (!lessonMatch && pathMatches.length === 0) {
-          if (/TEMPLATE_MISSING|TEMPLATE_INCOMPLETE|VALIDATION_FAILED/.test(text)) {
+          if (/TEMPLATE_MISSING|TEMPLATE_INCOMPLETE|VALIDATION_FAILED|EXERCISE_COUNT_UNSUPPORTED/.test(text)) {
             return { lessonId: '', artifacts: [], error: text.replace(/\s+/g, ' ').slice(0, 160) };
           }
           continue;
@@ -185,6 +185,11 @@ window.__ModuleLoader__.load({
           const count = Number(exerciseCount);
           if (!Number.isInteger(count) || count < 1 || count > 20) {
             setStatus({ kind: 'failed', text: '题量需要填写 1–20 的整数。' });
+            return;
+          }
+          const maxExercise = { 45: 6, 60: 8, 90: 12 }[Number(duration)] || 8;
+          if (count > maxExercise) {
+            setStatus({ kind: 'failed', text: '当前 ' + duration + ' 分钟内容包最多 ' + maxExercise + ' 道题。' });
             return;
           }
         }
@@ -408,7 +413,7 @@ window.__ModuleLoader__.load({
                 style: selectStyle,
               }, h('option', { value: '本科基础' }, '本科基础'), h('option', { value: '专业核心' }, '专业核心'), h('option', { value: '研究生' }, '研究生')),
               h('input', {
-                type: 'number', min: 1, max: 20, value: exerciseCount,
+                type: 'number', min: 1, max: { 45: 6, 60: 8, 90: 12 }[Number(duration)] || 8, value: exerciseCount,
                 onChange: (event) => setExerciseCount(event.target.value),
                 'aria-label': '习题数量',
                 style: { ...selectStyle, width: '64px' },
