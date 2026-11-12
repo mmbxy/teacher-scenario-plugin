@@ -38,7 +38,7 @@ window.__ModuleLoader__.load({
     }
 
     function parseResult(session) {
-      if (!session || !session.eventSource) return { lessonId: '', artifacts: [] };
+      if (!session || !session.eventSource) return { lessonId: '', artifacts: [], error: '' };
       let entries = [];
       try {
         entries = session.eventSource.getSnapshot().entries || [];
@@ -54,7 +54,12 @@ window.__ModuleLoader__.load({
         const text = texts.join('\n');
         const lessonMatch = text.match(/函数求导-\d{8,}-\d+min/);
         const pathMatches = text.match(/[A-Za-z]:[\\/][^\s"'<>]+?\.(?:md|docx|pptx|html)/g) || [];
-        if (!lessonMatch && pathMatches.length === 0) continue;
+        if (!lessonMatch && pathMatches.length === 0) {
+          if (/TEMPLATE_MISSING|TEMPLATE_INCOMPLETE|VALIDATION_FAILED/.test(text)) {
+            return { lessonId: '', artifacts: [], error: text.replace(/\s+/g, ' ').slice(0, 160) };
+          }
+          continue;
+        }
         const seen = new Set();
         const artifacts = [];
         pathMatches.forEach((item) => {
@@ -64,9 +69,9 @@ window.__ModuleLoader__.load({
           seen.add(key);
           artifacts.push(normalized);
         });
-        return { lessonId: lessonMatch ? lessonMatch[0] : '', artifacts };
+        return { lessonId: lessonMatch ? lessonMatch[0] : '', artifacts, error: '' };
       }
-      return { lessonId: '', artifacts: [] };
+      return { lessonId: '', artifacts: [], error: '' };
     }
 
     function loadHistory() {
@@ -153,12 +158,21 @@ window.__ModuleLoader__.load({
 
       const scan = React.useCallback((session) => {
         const parsed = parseResult(session);
+        if (parsed.error) {
+          setStatus({ kind: 'failed', text: '生成失败：' + parsed.error, lessonId: '', artifacts: [] });
+          updateHistory((previous) => previous.map((item) => item.id === historyIdRef.current
+            ? { ...item, status: 'failed', error: parsed.error }
+            : item));
+          return true;
+        }
         if (parsed.lessonId || parsed.artifacts.length > 0) {
           setStatus({ kind: 'completed', text: '已生成 ' + (parsed.artifacts.length || 16) + ' 件', lessonId: parsed.lessonId, artifacts: parsed.artifacts });
           updateHistory((previous) => previous.map((item) => item.id === historyIdRef.current
             ? { ...item, status: 'completed', lessonId: parsed.lessonId, artifacts: parsed.artifacts }
             : item));
+          return true;
         }
+        return false;
       }, [updateHistory]);
 
       const send = React.useCallback(async () => {
@@ -200,11 +214,7 @@ window.__ModuleLoader__.load({
           const session = binding.session;
 
           const onUpdate = () => {
-            const parsed = parseResult(session);
-            if (parsed.lessonId || parsed.artifacts.length > 0) {
-              scan(session);
-              return;
-            }
+            if (scan(session)) return;
             let running = false;
             try { running = session.getSnapshot().running === true; } catch { running = false; }
             if (running && status.kind !== 'completed') {
