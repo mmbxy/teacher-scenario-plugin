@@ -356,7 +356,7 @@ window.__ModuleLoader__.load({
           'div',
           { style: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', opacity: 0.78 } },
           h('span', null, '当前：' + editionText + ' · ' + teachingMode + ' · ' + courseLevel + ' · ' + exerciseCount + ' 题 · ' + formatText),
-          status.kind !== 'idle'
+          status.kind !== 'idle' || detailsOpen
             ? h('button', {
                 type: 'button',
                 onClick: () => setDetailsOpen((value) => !value),
@@ -422,6 +422,12 @@ window.__ModuleLoader__.load({
                   background: 'color-mix(in srgb, currentColor 3%, transparent)',
                 },
               },
+              h(
+                'div',
+                { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '4px' } },
+                h('strong', null, '生成详情'),
+                h('button', { type: 'button', onClick: () => setDetailsOpen(false), style: smallButton }, '收起'),
+              ),
               h(
                 'div',
                 { style: { display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' } },
