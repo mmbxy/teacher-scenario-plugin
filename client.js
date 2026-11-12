@@ -122,6 +122,12 @@ window.__ModuleLoader__.load({
         });
       }, []);
 
+      const clearHistory = React.useCallback(() => {
+        if (window.confirm('清空本浏览器里的备课历史？此操作不可撤销。')) {
+          updateHistory([]);
+        }
+      }, [updateHistory]);
+
       React.useEffect(() => () => {
         if (unsubscribeRef.current) unsubscribeRef.current();
         if (sessionRef.current && sessionRef.current.release) {
@@ -461,6 +467,12 @@ window.__ModuleLoader__.load({
                 : h(
                     'div',
                     { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+                    h(
+                      'div',
+                      { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', opacity: 0.72, marginBottom: '2px' } },
+                      h('span', null, '历史仅保存在本浏览器'),
+                      h('button', { type: 'button', onClick: clearHistory, disabled: history.length === 0, style: { ...smallButton, opacity: history.length === 0 ? 0.45 : 1 } }, '清空历史'),
+                    ),
                     history.length === 0
                       ? h('div', { style: { opacity: 0.7 } }, '还没有历史记录。')
                       : history.map((item) => h('div', { key: item.id, style: { display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid color-mix(in srgb, currentColor 8%, transparent)', padding: '3px 0' } },
