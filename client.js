@@ -45,17 +45,28 @@ window.__ModuleLoader__.load({
       } catch {
         entries = [];
       }
-      const texts = [];
-      entries.forEach((entry) => {
+      for (let index = entries.length - 1; index >= 0; index -= 1) {
+        const entry = entries[index];
         const event = entry && entry.event ? entry.event : entry;
-        if (!event || event.type !== 'tool/result') return;
+        if (!event || event.type !== 'tool/result') continue;
+        const texts = [];
         collectStrings(event.data, texts);
-      });
-      const text = texts.join('\n');
-      const lessonMatch = text.match(/函数求导-\d{8,}-\d+min/);
-      const pathMatches = text.match(/[A-Za-z]:[\\/][^\s"'<>]+?\.(?:md|docx|pptx|html)/g) || [];
-      const artifacts = Array.from(new Set(pathMatches.map((item) => item.replace(/\\\\/g, '\\'))));
-      return { lessonId: lessonMatch ? lessonMatch[0] : '', artifacts };
+        const text = texts.join('\n');
+        const lessonMatch = text.match(/函数求导-\d{8,}-\d+min/);
+        const pathMatches = text.match(/[A-Za-z]:[\\/][^\s"'<>]+?\.(?:md|docx|pptx|html)/g) || [];
+        if (!lessonMatch && pathMatches.length === 0) continue;
+        const seen = new Set();
+        const artifacts = [];
+        pathMatches.forEach((item) => {
+          const normalized = item.replace(/\\\\/g, '\\');
+          const key = normalized.replace(/\\/g, '/');
+          if (seen.has(key)) return;
+          seen.add(key);
+          artifacts.push(normalized);
+        });
+        return { lessonId: lessonMatch ? lessonMatch[0] : '', artifacts };
+      }
+      return { lessonId: '', artifacts: [] };
     }
 
     function loadHistory() {
