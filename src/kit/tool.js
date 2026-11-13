@@ -102,7 +102,12 @@ async function generateLectureKit(input, deps) {
       degraded: transformed.degraded === true,
       aiDraft: transformed.aiDraft === true,
       fallback: transformed.fallback || null,
-      reason: transformed.reason || ''
+      reason: transformed.reason || '',
+      failedSection: transformed.failedSection || '',
+      failedSectionTitle: transformed.failedSectionTitle || '',
+      targetChars: transformed.targetChars || 0,
+      raw: transformed.raw || '',
+      errors: transformed.errors || []
     };
   }
 
@@ -170,7 +175,12 @@ async function generateLectureKit(input, deps) {
     degraded: transform.degraded,
     aiDraft: transform.aiDraft,
     fallback: transform.fallback || null,
-    transformReason: transform.reason || ''
+    transformReason: transform.reason || '',
+    failedSection: transform.failedSection || '',
+    failedSectionTitle: transform.failedSectionTitle || '',
+    targetChars: transform.targetChars || 0,
+    raw: transform.raw || '',
+    errors: transform.errors || []
   };
 }
 

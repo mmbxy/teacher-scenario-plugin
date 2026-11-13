@@ -424,6 +424,11 @@ export function apply(ctx, config = {}) {
         aiDraft: result.aiDraft,
         fallback: result.fallback,
         transformReason: result.transformReason,
+        failedSection: result.failedSection,
+        failedSectionTitle: result.failedSectionTitle,
+        targetChars: result.targetChars,
+        raw: result.raw,
+        errors: result.errors,
         artifacts: result.artifacts
       }, null, 2);
     }

@@ -36,12 +36,13 @@ async function applyModelLesson(spec, options = {}) {
   }
 
   const original = clone(spec);
-  const fallback = (reason) => ({
+  const fallback = (reason, detail = {}) => ({
     ok: true,
     degraded: true,
     aiDraft: false,
     fallback: 'template',
     reason,
+    ...detail,
     spec: clone(original)
   });
 
@@ -74,7 +75,13 @@ async function applyModelLesson(spec, options = {}) {
       targetChars
     });
     if (!generated || !generated.ok || !generated.section) {
-      return fallback((generated && generated.reason) || '模型生成失败');
+      return fallback((generated && generated.reason) || '模型生成失败', {
+        failedSection: section.id,
+        failedSectionTitle: section.title,
+        attempts: generated ? generated.attempts : 0,
+        targetChars,
+        raw: generated && generated.raw ? String(generated.raw).slice(0, 1000) : ''
+      });
     }
     section.title = generated.section.title || section.title;
     section.keyPoints = generated.section.keyPoints.slice();
@@ -93,7 +100,11 @@ async function applyModelLesson(spec, options = {}) {
   const validation = validateLessonSpec(updated, { mode: 'full' });
   if (!validation.ok) {
     const first = validation.errors[0] || { code: 'VALIDATION_FAILED', message: 'full 校验失败' };
-    return fallback(`full 校验失败：${first.message}`);
+    return fallback(`full 校验失败：${first.message}`, {
+      failedSection: first.path || '',
+      targetChars,
+      errors: validation.errors.slice(0, 5)
+    });
   }
 
   const words = updated.sections.reduce((sum, section) => sum + (section.wordCount || 0), 0);
