@@ -160,9 +160,9 @@ export function apply(ctx, config = {}) {
         description: '知识点或章节文本；当前内容包只覆盖「函数求导」，其它知识点会返回 TEMPLATE_MISSING。'
       },
       durationMinutes: {
-        type: 'string',
-        enum: ['45', '60', '90'],
-        default: '60',
+        type: 'number',
+        enum: [45, 60, 90],
+        default: 60,
         description: '课时长度：45 / 60 / 90 分钟，默认 60。'
       },
       exerciseCount: {
