@@ -280,7 +280,8 @@ export function apply(ctx, config = {}) {
       durationMinutes: { type: 'number', description: '45 / 60 / 90，默认 60。' },
       sectionId: { type: 'string', description: '要替换的分节，例如 S2；默认第一节。' },
       provider: { type: 'string', description: '可选；默认第一个可用 provider。' },
-      model: { type: 'string', description: '可选；默认第一个可用模型。' }
+      model: { type: 'string', description: '可选；默认第一个可用模型。' },
+      simulateFailure: { type: 'boolean', description: '测试用：强制模型失败，验证降级到模板。' }
     },
     output: {
       schema: { type: 'string' },
@@ -318,11 +319,26 @@ export function apply(ctx, config = {}) {
         llm,
         provider,
         model,
-        sectionId: args.sectionId
+        sectionId: args.sectionId,
+        forceFailure: args.simulateFailure === true
       });
       if (!result.ok) {
         const raw = result.raw ? `；原文：${String(result.raw).replace(/\s+/g, ' ').slice(0, 500)}` : '';
         throw new Error(`单节生成失败：${result.reason}（attempts=${result.attempts || 0}）${raw}`);
+      }
+      if (result.degraded) {
+        return JSON.stringify({
+          ok: true,
+          degraded: true,
+          aiDraft: false,
+          fallback: 'template',
+          attempts: result.attempts,
+          reason: result.reason,
+          sectionId: result.section.id,
+          title: result.section.title,
+          content: result.section.content,
+          at: new Date().toISOString()
+        }, null, 2);
       }
       return JSON.stringify({
         ok: true,

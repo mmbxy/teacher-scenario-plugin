@@ -33,6 +33,21 @@ async function applyModelSection(spec, options = {}) {
     return { ok: false, degraded: true, aiDraft: true, reason: `找不到分节 ${sectionId}` };
   }
 
+  const fallback = (reason, attempts = 0) => ({
+    ok: true,
+    degraded: true,
+    aiDraft: false,
+    fallback: 'template',
+    attempts,
+    reason,
+    section: clone(target),
+    spec: clone(spec)
+  });
+
+  if (options.forceFailure === true) {
+    return fallback('测试强制模型失败', 1);
+  }
+
   let modelProvider = options.modelProvider;
   if (!modelProvider) {
     if (!options.llm) {
@@ -60,13 +75,17 @@ async function applyModelSection(spec, options = {}) {
     context
   });
   if (!generated || !generated.ok || !generated.section) {
-    return {
-      ok: false,
-      degraded: true,
-      aiDraft: true,
-      attempts: generated ? generated.attempts : 0,
-      reason: (generated && generated.reason) || '模型生成失败'
-    };
+    const reason = (generated && generated.reason) || '模型生成失败';
+    if (options.fallbackToTemplate === false) {
+      return {
+        ok: false,
+        degraded: true,
+        aiDraft: true,
+        attempts: generated ? generated.attempts : 0,
+        reason
+      };
+    }
+    return fallback(reason, generated ? generated.attempts : 0);
   }
 
   const updated = clone(spec);

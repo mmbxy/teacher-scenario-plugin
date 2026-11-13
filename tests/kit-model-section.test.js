@@ -55,13 +55,32 @@ test('单节接入：成功替换目标节并标记 aiDraft', async () => {
   assert.equal(result.spec.meta.aiDraftSections.includes('S2'), true);
 });
 
-test('单节接入：模型失败时不修改原 spec', async () => {
+test('单节接入：模型失败时降级为模板，不修改原 spec', async () => {
   const spec = buildFilledSpec();
   const before = JSON.stringify(spec);
-  const result = await applyModelSection(spec, { provider: 'p', model: 'm', modelProvider: fakeModel(modelSection, { fail: true }) });
+  const result = await applyModelSection(spec, { sectionId: 'S2', provider: 'p', model: 'm', modelProvider: fakeModel(modelSection, { fail: true }) });
+  assert.equal(result.ok, true);
+  assert.equal(result.degraded, true);
+  assert.equal(result.fallback, 'template');
+  assert.equal(result.aiDraft, false);
+  assert.equal(JSON.stringify(spec), before);
+  assert.equal(result.section.content, spec.sections.find((section) => section.id === 'S2').content);
+});
+
+test('单节接入：关闭降级时返回失败', async () => {
+  const spec = buildFilledSpec();
+  const result = await applyModelSection(spec, { provider: 'p', model: 'm', modelProvider: fakeModel(modelSection, { fail: true }), fallbackToTemplate: false });
   assert.equal(result.ok, false);
   assert.equal(result.degraded, true);
-  assert.equal(JSON.stringify(spec), before);
+});
+
+test('单节接入：测试开关强制失败也走模板降级', async () => {
+  const spec = buildFilledSpec();
+  const result = await applyModelSection(spec, { forceFailure: true });
+  assert.equal(result.ok, true);
+  assert.equal(result.degraded, true);
+  assert.equal(result.fallback, 'template');
+  assert.equal(result.aiDraft, false);
 });
 
 test('单节接入：找不到分节返回降级', async () => {
