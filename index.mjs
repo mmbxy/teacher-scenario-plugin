@@ -321,7 +321,8 @@ export function apply(ctx, config = {}) {
         sectionId: args.sectionId
       });
       if (!result.ok) {
-        throw new Error(`单节生成失败：${result.reason}（attempts=${result.attempts || 0}）`);
+        const raw = result.raw ? `；原文：${String(result.raw).replace(/\s+/g, ' ').slice(0, 500)}` : '';
+        throw new Error(`单节生成失败：${result.reason}（attempts=${result.attempts || 0}）${raw}`);
       }
       return JSON.stringify({
         ok: true,
