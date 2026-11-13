@@ -78,7 +78,7 @@ function createModelProvider(options) {
     throw new Error('ModelProvider 需要显式 provider/model');
   }
   const timeoutMs = Number.isFinite(options.timeoutMs) && options.timeoutMs > 0 ? options.timeoutMs : 20000;
-  const maxTokens = Number.isFinite(options.maxTokens) && options.maxTokens > 0 ? options.maxTokens : 900;
+  const maxTokens = Number.isFinite(options.maxTokens) && options.maxTokens > 0 ? options.maxTokens : 1600;
   const temperature = Number.isFinite(options.temperature) ? options.temperature : 0;
 
   async function streamOnce(prompt) {
