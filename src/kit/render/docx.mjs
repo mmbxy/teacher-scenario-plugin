@@ -15,6 +15,10 @@ function lines(value) {
   return clean(value).split(/\n+/).filter((item) => item.length > 0);
 }
 
+function sectionTitle(section) {
+  return `${section.title}${section.aiDraft ? '（AI 草稿，需审校）' : ''}`;
+}
+
 export async function renderDocx(spec, options = {}) {
   const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import('docx');
   const meta = spec.meta || {};
@@ -49,7 +53,7 @@ export async function renderDocx(spec, options = {}) {
 
   children.push(new Paragraph({ text: '分节内容', heading: HeadingLevel.HEADING_1 }));
   sections.forEach((section) => {
-    children.push(new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_2 }));
+    children.push(new Paragraph({ text: sectionTitle(section), heading: HeadingLevel.HEADING_2 }));
     lines(section.content)
       .filter((text) => !isPlanningLine(text))
       .filter((text) => showAnswers || !isTeacherOnlyLine(text))
@@ -57,6 +61,12 @@ export async function renderDocx(spec, options = {}) {
     (Array.isArray(section.keyPoints) ? section.keyPoints : []).forEach((point) => {
       children.push(new Paragraph({ text: `• ${plainText(point)}`, indent: { left: 360 } }));
     });
+    if (section.example && clean(section.example.statement)) {
+      children.push(new Paragraph({ text: `本节示例：${plainText(section.example.statement)}`, indent: { left: 360 } }));
+      if (showAnswers && clean(section.example.answer)) {
+        children.push(new Paragraph({ text: `示例答案：${plainText(section.example.answer)}`, indent: { left: 360 } }));
+      }
+    }
   });
 
   children.push(new Paragraph({ text: '例题', heading: HeadingLevel.HEADING_1 }));

@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const { createLessonSpec } = require('../src/kit');
 const template = require('../src/kit/providers/template');
 const { applyModelSection } = require('../src/kit/model-section');
+const { renderMarkdown } = require('../src/kit/render/markdown');
 
 function buildFilledSpec() {
   const built = createLessonSpec({ topic: '函数求导', durationMinutes: 60 });
@@ -50,6 +51,7 @@ test('单节接入：成功替换目标节并标记 aiDraft', async () => {
   assert.equal(result.section.id, 'S2');
   assert.equal(result.section.content, modelSection.content);
   assert.equal(result.section.aiDraft, true);
+  assert.deepEqual(result.section.example, modelSection.example);
   assert.equal(result.spec.meta.aiDraftSections.includes('S2'), true);
 });
 
@@ -82,4 +84,16 @@ test('单节接入：只替换目标节，其他节保持模板内容', async ()
   const result = await applyModelSection(spec, { sectionId: 'S2', modelProvider: fakeModel(modelSection) });
   assert.equal(result.ok, true);
   assert.equal(result.spec.sections.find((section) => section.id === 'S3').content, beforeOther);
+});
+
+test('单节接入：Markdown 标记 AI 草稿，教师版含示例答案，学生版不含', async () => {
+  const spec = buildFilledSpec();
+  const result = await applyModelSection(spec, { sectionId: 'S2', modelProvider: fakeModel(modelSection) });
+  const teacher = renderMarkdown(result.spec, { audience: 'teacher' }).find((file) => file.name === 'lecture-plan.md').content;
+  const student = renderMarkdown(result.spec, { audience: 'student' }).find((file) => file.name === 'handout.md').content;
+  assert.match(teacher, /AI 草稿，需审校/);
+  assert.match(teacher, /本节示例/);
+  assert.match(teacher, /示例答案/);
+  assert.match(student, /AI 草稿，需审校/);
+  assert.doesNotMatch(student, /示例答案/);
 });

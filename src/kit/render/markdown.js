@@ -9,6 +9,18 @@ function line(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function sectionTitle(section) {
+  return `${section.title}${section.aiDraft ? '（AI 草稿，需审校）' : ''}`;
+}
+
+function appendSectionExample(parts, section, audience) {
+  if (!section.example || !line(section.example.statement)) return;
+  parts.push('', `**本节示例**：${section.example.statement}`);
+  if (audience !== 'student' && line(section.example.answer)) {
+    parts.push('', `**示例答案**：${section.example.answer}`);
+  }
+}
+
 function studentContent(content, audience) {
   if (audience !== 'student') return content;
   return String(content || '')
@@ -48,10 +60,11 @@ function renderLecturePlan(spec, options = {}) {
   parts.push('');
   parts.push('## 分节内容');
   sections.forEach((section) => {
-    parts.push(`### ${section.title}`);
+    parts.push(`### ${sectionTitle(section)}`);
     const keyPoints = listOrEmpty(section.keyPoints);
     if (keyPoints.length > 0) keyPoints.forEach((point) => parts.push(`- ${point}`));
     if (line(section.content)) parts.push('', studentContent(section.content, audience));
+    appendSectionExample(parts, section, audience);
     parts.push('');
   });
   parts.push('## 例题');
@@ -89,8 +102,9 @@ function renderHandout(spec, options = {}) {
   objectives.forEach((item) => parts.push(`- ${item.text}`));
   parts.push('');
   sections.forEach((section) => {
-    parts.push(`## ${section.title}`);
+    parts.push(`## ${sectionTitle(section)}`);
     if (line(section.content)) parts.push('', studentContent(section.content, audience));
+    appendSectionExample(parts, section, audience);
     parts.push('');
   });
   return parts.join('\n');

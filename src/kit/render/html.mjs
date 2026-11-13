@@ -39,13 +39,20 @@ function sectionHtml(section, index, audience) {
   const keyPoints = (Array.isArray(section.keyPoints) ? section.keyPoints : [])
     .map((point) => `<li>${escapeHtml(plainText(point))}</li>`)
     .join('');
+  const aiBadge = section.aiDraft
+    ? ' <span style="font-size:12px;font-weight:400;color:#b45309;border:1px solid #f59e0b;border-radius:4px;padding:1px 5px">AI 草稿，需审校</span>'
+    : '';
+  const example = section.example && section.example.statement
+    ? `<div class="keypoints"><h3>本节示例</h3><p>${escapeHtml(plainText(section.example.statement))}</p>${audience !== 'student' && section.example.answer ? `<p><strong>示例答案：</strong>${escapeHtml(plainText(section.example.answer))}</p>` : ''}</div>`
+    : '';
   return `<section class="panel${index === 0 ? ' active' : ''}" id="panel-${index}" data-panel="${index}">
   <div class="panel-head">
     <span class="eyebrow">第 ${index + 1} 节</span>
-    <h2>${escapeHtml(section.title)}</h2>
+    <h2>${escapeHtml(section.title)}${aiBadge}</h2>
   </div>
   <div class="prose">${paragraphs(section.content, audience) || '<p class="muted">内容待补充。</p>'}</div>
   ${keyPoints ? `<div class="keypoints"><h3>本节点</h3><ul>${keyPoints}</ul></div>` : ''}
+  ${example}
 </section>`;
 }
 

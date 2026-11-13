@@ -17,6 +17,10 @@ function chunk(items, size) {
   return chunks;
 }
 
+function sectionTitle(section) {
+  return `${section.title}${section.aiDraft ? '（AI 草稿，需审校）' : ''}`;
+}
+
 function sectionLines(section, audience) {
   const keyPoints = (Array.isArray(section.keyPoints) ? section.keyPoints : [])
     .map((item) => plainText(item))
@@ -31,13 +35,21 @@ function sectionLines(section, audience) {
     .filter((line) => !isPlanningLine(line))
     .filter((line) => line !== section.title)
     .filter((line) => audience !== 'student' || !isTeacherOnlyLine(line));
-  return Array.from(new Set([...keyPoints, ...contentLines]));
+  const exampleLines = [];
+  if (section.example && plainText(section.example.statement)) {
+    exampleLines.push(`本节示例：${plainText(section.example.statement)}`);
+    if (audience !== 'student' && plainText(section.example.answer)) {
+      exampleLines.push(`示例答案：${plainText(section.example.answer)}`);
+    }
+  }
+  return Array.from(new Set([...keyPoints, ...contentLines, ...exampleLines]));
 }
 export function sectionNote(section, timeline = []) {
   const slot = timeline.find((item) => item.id === section.timelineId);
   const minutes = slot && Number.isInteger(slot.durationMinutes) ? slot.durationMinutes : 0;
   const goal = plainText(section.content).split(/\n+/).find((line) => line.length > 0) || '内容待填充';
-  return `本节：${section.title}；建议时长 ${minutes} 分钟。要点：${goal.slice(0, 80)}`;
+  const prefix = section.aiDraft ? 'AI 草稿，需教师审校。' : '';
+  return `${prefix}本节：${section.title}；建议时长 ${minutes} 分钟。要点：${goal.slice(0, 80)}`;
 }
 
 export async function renderPptx(spec, options = {}) {
@@ -69,7 +81,7 @@ export async function renderPptx(spec, options = {}) {
     const groups = lines.length > 0 ? chunk(lines, 4) : [['（内容待填充）']];
     groups.forEach((group, pageIndex) => {
       const slide = pptx.addSlide();
-      slide.addText(pageIndex === 0 ? section.title : `${section.title}（续 ${pageIndex}）`, {
+      slide.addText(pageIndex === 0 ? sectionTitle(section) : `${sectionTitle(section)}（续 ${pageIndex}）`, {
         x: 0.6, y: 0.4, w: 12, h: 0.8, fontSize: 30, bold: true, color: '1F3A5F', fontFace: 'Microsoft YaHei'
       });
       group.forEach((text, index) => {

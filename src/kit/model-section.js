@@ -74,6 +74,7 @@ async function applyModelSection(spec, options = {}) {
   nextSection.title = generated.section.title || nextSection.title;
   nextSection.keyPoints = generated.section.keyPoints.slice();
   nextSection.content = generated.section.content;
+  nextSection.example = generated.section.example;
   nextSection.wordCount = Array.from(generated.section.content).length;
   nextSection.aiDraft = true;
   nextSection.contentSource = 'model';
