@@ -4,10 +4,16 @@ import { defineTool } from '@deepseek-ai/dsh-tools';
 import generateModule from './src/generate.js';
 import io from './src/kit/io.js';
 import kitTool from './src/kit/tool.js';
+import kitModule from './src/kit/index.js';
+import templateModule from './src/kit/providers/template.js';
+import modelSectionModule from './src/kit/model-section.js';
 
 const { generateLesson } = generateModule;
 const { writeOutput } = io;
 const { generateLectureKit } = kitTool;
+const { createLessonSpec } = kitModule;
+const template = templateModule;
+const { applyModelSection } = modelSectionModule;
 
 /** Stable Loader identity. */
 export const name = 'teacher-scenario-plugin';
@@ -262,6 +268,76 @@ export function apply(ctx, config = {}) {
         throw error;
       }
       return result;
+    }
+  }));
+
+  // T5.3：只生成一节模型草稿，不写产物、不改 16 件流程。
+  ctx.tools.register(defineTool({
+    name: 'teacher_generate_section_draft',
+    description: 'T5.3 单节草稿：用宿主模型替换模板中的一节，返回该节与 aiDraft 标记；不生成完整课时包。',
+    parameters: {
+      topic: { type: 'string', required: true, description: '当前只支持“函数求导”。' },
+      durationMinutes: { type: 'number', description: '45 / 60 / 90，默认 60。' },
+      sectionId: { type: 'string', description: '要替换的分节，例如 S2；默认第一节。' },
+      provider: { type: 'string', description: '可选；默认第一个可用 provider。' },
+      model: { type: 'string', description: '可选；默认第一个可用模型。' }
+    },
+    output: {
+      schema: { type: 'string' },
+      render: (_args, value) => [{ type: 'text', text: value }]
+    },
+    async execute(args) {
+      const topic = String(args.topic || '').trim();
+      if (!topic) throw new Error('topic 不能为空。');
+      const built = createLessonSpec({
+        topic,
+        durationMinutes: Number(args.durationMinutes) || 60
+      });
+      if (!built.ok) throw new Error(`${built.message}（${built.code}）`);
+      const filled = template.createTemplateProvider().fill(built.spec);
+      if (!filled.ok) throw new Error(`${filled.message}（${filled.code}）`);
+
+      const llm = ctx.get('llm');
+      if (!llm) throw new Error('宿主没有提供 llm 服务。');
+      let provider = args.provider;
+      let model = args.model;
+      if (!provider || !model) {
+        for (const row of llm.listProviders()) {
+          let models = [];
+          try { models = await llm.listModels(row.id); } catch { models = []; }
+          if (models.length > 0) {
+            provider = provider || row.id;
+            model = model || models[0].id || models[0];
+            break;
+          }
+        }
+      }
+      if (!provider || !model) throw new Error('没有可用的模型。');
+
+      const result = await applyModelSection(filled.spec, {
+        llm,
+        provider,
+        model,
+        sectionId: args.sectionId
+      });
+      if (!result.ok) {
+        throw new Error(`单节生成失败：${result.reason}（attempts=${result.attempts || 0}）`);
+      }
+      return JSON.stringify({
+        ok: true,
+        aiDraft: true,
+        attempts: result.attempts,
+        elapsedMs: result.elapsedMs,
+        tokens: result.tokens,
+        provider,
+        model,
+        sectionId: result.section.id,
+        title: result.section.title,
+        keyPoints: result.section.keyPoints,
+        content: result.section.content,
+        example: result.section.example,
+        at: new Date().toISOString()
+      }, null, 2);
     }
   }));
 }
