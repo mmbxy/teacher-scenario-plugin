@@ -7,6 +7,7 @@ import kitTool from './src/kit/tool.js';
 import kitModule from './src/kit/index.js';
 import templateModule from './src/kit/providers/template.js';
 import modelSectionModule from './src/kit/model-section.js';
+import modelLessonModule from './src/kit/model-lesson.js';
 
 const { generateLesson } = generateModule;
 const { writeOutput } = io;
@@ -14,6 +15,7 @@ const { generateLectureKit } = kitTool;
 const { createLessonSpec } = kitModule;
 const template = templateModule;
 const { applyModelSection } = modelSectionModule;
+const { applyModelLesson } = modelLessonModule;
 
 /** Stable Loader identity. */
 export const name = 'teacher-scenario-plugin';
@@ -354,6 +356,75 @@ export function apply(ctx, config = {}) {
         content: result.section.content,
         example: result.section.example,
         at: new Date().toISOString()
+      }, null, 2);
+    }
+  }));
+
+  // T5.5：整包模型草稿。只替换 7 节；任一节/整包校验失败回退模板。
+  ctx.tools.register(defineTool({
+    name: 'teacher_generate_model_kit',
+    description: 'T5.5 整包模型草稿：用模型替换 7 节，跑 full 校验，失败自动回退模板；当前仅支持已有模板的知识点（如函数求导）。',
+    parameters: {
+      topic: { type: 'string', required: true, description: '当前只支持“函数求导”。' },
+      durationMinutes: { type: 'number', description: '45 / 60 / 90，默认 60。' },
+      edition: { type: 'string', description: 'teacher / student / both，默认 both。' },
+      exerciseCount: { type: 'integer', description: '习题数量，默认 8。' },
+      teachingMode: { type: 'string', description: '讲授 / 研讨 / 翻转，默认 讲授。' },
+      courseLevel: { type: 'string', description: '本科基础 / 专业核心 / 研究生，默认 本科基础。' },
+      withDocx: { type: 'boolean', description: '是否导出 Word，默认 true。' },
+      withPptx: { type: 'boolean', description: '是否导出 PPT，默认 true。' },
+      withHtml: { type: 'boolean', description: '是否导出 HTML，默认 true。' }
+    },
+    output: {
+      schema: { type: 'string' },
+      render: (_args, value) => [{ type: 'text', text: value }]
+    },
+    async execute(args, exec) {
+      if (exec.agent === undefined) throw new Error('teacher_generate_model_kit 需要一个 Agent 会话。');
+      const cwd = await ctx.workingDirectory.ensure(exec.agent, exec.signal);
+      const outputDir = config.outputDir && String(config.outputDir).trim().length > 0
+        ? String(config.outputDir)
+        : path.join(cwd, 'teacher-artifacts');
+
+      const llm = ctx.get('llm');
+      if (!llm) throw new Error('宿主没有提供 llm 服务。');
+      let provider = null;
+      let model = null;
+      for (const row of llm.listProviders()) {
+        let models = [];
+        try { models = await llm.listModels(row.id); } catch { models = []; }
+        if (models.length > 0) {
+          provider = row.id;
+          model = models[0].id || models[0];
+          break;
+        }
+      }
+      if (!provider || !model) throw new Error('没有可用的模型。');
+
+      const result = await generateLectureKit(args, {
+        now: () => Date.now(),
+        outputDir,
+        writeFile: writeOutput,
+        transformSpec: (spec) => applyModelLesson(spec, {
+          llm,
+          provider,
+          model,
+          timeoutMs: 60000,
+          maxTokens: 2600
+        })
+      });
+      if (!result.ok) throw new Error(`${result.message}（${result.code}）`);
+      return JSON.stringify({
+        ok: true,
+        lessonId: result.lessonId,
+        topic: result.topic,
+        durationMinutes: result.durationMinutes,
+        words: result.words,
+        degraded: result.degraded,
+        aiDraft: result.aiDraft,
+        fallback: result.fallback,
+        transformReason: result.transformReason,
+        artifacts: result.artifacts
       }, null, 2);
     }
   }));

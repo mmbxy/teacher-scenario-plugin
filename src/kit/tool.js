@@ -81,16 +81,41 @@ async function generateLectureKit(input, deps) {
   const filled = provider.fill(built.spec);
   if (!filled.ok) return failure(filled.code, filled.message, filled.detail);
 
+  let spec = filled.spec;
+  let transform = { degraded: false, aiDraft: false };
+  if (typeof options.transformSpec === 'function') {
+    let transformed;
+    try {
+      transformed = await options.transformSpec(spec);
+    } catch (error) {
+      return failure('MODEL_TRANSFORM_FAILED', `模型接入失败：${error.message}`, 'transform=throw');
+    }
+    if (!transformed || !transformed.ok || !transformed.spec) {
+      return failure(
+        'MODEL_TRANSFORM_FAILED',
+        `模型接入失败：${(transformed && transformed.reason) || '未知原因'}`,
+        'transform=not-ok'
+      );
+    }
+    spec = transformed.spec;
+    transform = {
+      degraded: transformed.degraded === true,
+      aiDraft: transformed.aiDraft === true,
+      fallback: transformed.fallback || null,
+      reason: transformed.reason || ''
+    };
+  }
+
   const requestedCount = input.exerciseCount;
-  if (Number.isInteger(requestedCount) && requestedCount > filled.spec.exercises.length) {
+  if (Number.isInteger(requestedCount) && requestedCount > spec.exercises.length) {
     return failure(
       'EXERCISE_COUNT_UNSUPPORTED',
-      `当前内容包最多 ${filled.spec.exercises.length} 道题，无法生成 ${requestedCount} 道。`,
-      `requested=${requestedCount};available=${filled.spec.exercises.length}`
+      `当前内容包最多 ${spec.exercises.length} 道题，无法生成 ${requestedCount} 道。`,
+      `requested=${requestedCount};available=${spec.exercises.length}`
     );
   }
 
-  const validation = validateLessonSpec(filled.spec, { mode: 'full' });
+  const validation = validateLessonSpec(spec, { mode: 'full' });
   if (!validation.ok) {
     const first = validation.errors[0] || { code: 'VALIDATION_FAILED', path: '', message: '校验失败' };
     return failure(
@@ -103,13 +128,13 @@ async function generateLectureKit(input, deps) {
   const formats = normalizeFormats(input);
   const editions = normalizeEditions(input);
   const renderer = await import('./render/index.mjs');
-  const outputRoot = `${options.outputDir.replace(/[\\/]+$/, '')}/${filled.spec.lessonId}`;
+  const outputRoot = `${options.outputDir.replace(/[\\/]+$/, '')}/${spec.lessonId}`;
   const artifacts = [];
 
   for (const edition of editions) {
     let files;
     try {
-      files = await renderer.renderKit(filled.spec, { formats, audience: edition });
+      files = await renderer.renderKit(spec, { formats, audience: edition });
     } catch (error) {
       return failure('RENDER_FAILED', `渲染失败：${error.message}`, `render=throw;edition=${edition}`);
     }
@@ -135,13 +160,17 @@ async function generateLectureKit(input, deps) {
 
   return {
     ok: true,
-    lessonId: filled.spec.lessonId,
-    topic: filled.spec.meta.topic,
-    durationMinutes: filled.spec.meta.durationMinutes,
+    lessonId: spec.lessonId,
+    topic: spec.meta.topic,
+    durationMinutes: spec.meta.durationMinutes,
     artifacts,
-    words: filled.spec.sections.reduce((sum, section) => sum + section.wordCount, 0),
-    deckPages: filled.spec.deckPages,
-    warnings: filled.warnings || []
+    words: spec.sections.reduce((sum, section) => sum + section.wordCount, 0),
+    deckPages: spec.deckPages,
+    warnings: filled.warnings || [],
+    degraded: transform.degraded,
+    aiDraft: transform.aiDraft,
+    fallback: transform.fallback || null,
+    transformReason: transform.reason || ''
   };
 }
 
